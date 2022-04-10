@@ -1,3 +1,6 @@
 .idea
+.ide/*
 target
-project/target
+target/*
+project
+project/*
