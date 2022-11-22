@@ -6,3 +6,5 @@ lazy val root = (project in file("."))
   .settings(
     name := "Progetto-Scalable-2022"
   )
+
+ThisBuild / libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.1"

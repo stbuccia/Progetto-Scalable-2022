@@ -1,32 +1,46 @@
-import scala.annotation.tailrec
 
-/* Implementation of Sequential Apriori
-  Inspired by wikipedia page and "Apriori-Map/Reduce Algorithm", J. Woo paper
- */
+val transactions = List(
+  Set("A", "B", "C", "D"),
+  Set("A" ,"B", "D"), 
+  Set("A", "B"), 
+  Set("B", "C", "D"), 
+  Set("C", "D"), 
+  Set("B", "D"), 
+)
 
-val transactions = List(Set("A", "B", "C"), Set("A" ,"C"), Set("B", "C", "D", "E"), Set("A", "D"), Set("E"), Set("C", "D", "E", "F", "G" ))
-val setC = Set(Set("A"), Set("B"), Set("C"), Set("D"), Set("E"), Set("F"), Set("G"))
-
-
-def joinSort(setL: Set[Set[String]], k: Int) = {
-  setL.map(itemset1 => setL.map(itemset2 => itemset1 | itemset2))
-    .reduce(_ | _) //riporta i set al livello precedente (siamo dentro due map)
-    .filter(_.size == k)
-}
-
-def prune(setC: Set[Set[String]], transactions: List[Set[String]], minSupport: Double): Set[Set[String]] = {
-  setC.filter(set => transactions.count(set.subsetOf(_))  >=  minSupport)
+//TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)
+def phase1(transactionsRdd: RDD[Set[String]]) = {
+  transactionsRdd.flatMap(itemset => itemset.map(item => (Set(item), 1))).reduceByKey((x, y) => x + y).filter(item => item._2 > 2)
 }
 
 @tailrec
-def apriori(setL: Set[Set[String]], transactions: List[Set[String]], k: Int, minSupport: Int): Any = {
-  val frequentElements = prune(joinSort(setL, k), transactions, minSupport)
-  if (frequentElements.isEmpty)
-    setL
-  else
-    apriori(frequentElements, transactions, k + 1, minSupport)
+def phase2(transactionsRdd: RDD[Set[String]], k: Int, minimum: Int, setL: RDD[(Set[String], Int)]): RDD[Set[String]] = {
+  val setL_strings = setL.map(_._1)
+
+  val setC_k = setL_strings.cartesian(setL_strings)
+    .map(tuples => tuples._1 | tuples._2)
+    .filter(_.size == k)
+    .distinct()
+
+  val setL_k = setC_k.cartesian(transactionsRdd)
+    .filter(tuple => tuple._1.subsetOf(tuple._2))
+    .map(tuple => (tuple._1, 1))
+    .reduceByKey((x, y) => x + y)
+    .filter(item => item._2 > minimum) 
+
+  if (setL_k.count() == 0)
+    setC_k
+  else 
+    phase2(transactionsRdd, k + 1, minimum, setL_k)
+  
 }
 
-apriori(setC, transactions, 1, 2)
+val conf = new SparkConf().setAppName("apriori-sequential").setMaster("local[2]")
+conf.set("spark.driver.allowMultipleContexts","true");
+val sc = new SparkContext(conf)
+val transactionsRdd = sc.parallelize(transactions)
 
+val setL_1 = phase1(transactionsRdd)
 
+val out = phase2(transactionsRdd, 2, 2, setL_1)
+out.collect().foreach(println)
