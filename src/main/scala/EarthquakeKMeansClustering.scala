@@ -73,7 +73,7 @@ object EarthquakeKMeans {
     saveElbowLinePlot(wss_list, clusters_range, filename)
   }
 
-  def kMeansClustering(sc: SparkContext, dataFilePath: String, column: Int, numClusters: Int, numIterations: Int): RDD[(Double, Int)] = {
+  def kMeansClustering(sc: SparkContext, dataFilePath: String, column: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
       val src = getResourceFile(dataFilePath).filter(_.nonEmpty).drop(1).toList
       val textData = sc.parallelize(src)
       val magColumn = 3
@@ -88,15 +88,13 @@ object EarthquakeKMeans {
       println("Clustering...")
 
       // Cluster the data into two classes using KMeans
-      val numClusters = 15
-      val numIterations = 20
       val clusters = KMeans.train(vectors, numClusters, numIterations) // returns a KMeansModel obj
 
 
       println("Computing elbow method....")
 
       // Elbow method computation
-      computeElbow(2, 10, vectors, numIterations)
+      computeElbow(2, 10, vectors, numIterations, modelName + "ElbowPlot.png")
 
 
       println("Results:")
@@ -145,8 +143,8 @@ object EarthquakeKMeans {
 
     println("Loading Earthquake data...")
 
-    val discretizedDataMag: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 3, 3, 20)
-    //val discretizedDataDepth: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 2, 3, 20)
+    val discretizedDataMag: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 3, 5, 20, "clusteredDataMag")
+    val discretizedDataDepth: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 2, 6, 20, "clusteredDataDepth")
   }
 }
 
