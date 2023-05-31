@@ -1,4 +1,8 @@
 .idea/*
+.idea
+target
 target/*
+.bloop
+.metals
 project/*
 download
