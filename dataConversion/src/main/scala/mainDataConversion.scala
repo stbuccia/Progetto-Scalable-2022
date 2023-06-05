@@ -15,33 +15,12 @@ object mainDataConversion {
       .setMaster(master)
     val sc = new SparkContext(conf)
 
+    println("Read CSV file...")
     val rdd = readCSV(sc, "src/main/resources/dataset_from_2010_01_to_2021_12.csv")
-    rdd.take(5).foreach(println)
-
-    val rdd2 = rdd.map(x => dataConversion(x))
-
-    rdd2.take(5).foreach(println)
-
-
-    val pwCSV = new PrintWriter(
-      new File("src/main/resources/output.csv")
-    )
-    rdd2.collect().foreach(pair => {
-      pwCSV.write(toCSVLine(pair) + "\n")
-    })
-    pwCSV.close()
-
-    //val lines = rdd2.map(toCSVLine)
-    //lines.saveAsTextFile("src/main/resources/output.csv")
-
-    //rdd.saveAsTextFile("src/main/resources/output.csv")
-
-    /*
-    val df2 = rdd.toDF()
-    df2.write.option("header", "true")
-      .csv("/tmp/spark_output/zipcodes")
-    */
-
+    println("Data conversion...")
+    val rdd_output = rdd.map(x => dataConversion(x))
+    println("Write CSV file...")
+    saveAsCSVFile(rdd_output)
   }
 
   def readCSV(sc: SparkContext, path: String): RDD[(String,String,String,String,String )] = {
@@ -55,11 +34,8 @@ object mainDataConversion {
       .map{ case Array(x1,x2,x3,x4,x5) => (x1,x2,x3,x4,x5)}
   }
 
-  def toCSVLine(x: Tuple12[Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int]): String = {
-    x._1 +"," +x._2 +"," +x._3 +"," +x._4 +"," +x._5 +"," +x._6 +"," +x._7 +"," +x._8 +"," +x._9 +"," +x._10 +","+x._11 +","+x._12;
-  }
 
-  def dataConversion(x: Tuple5[String,String,String,String,String]) : Tuple12[Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int] = {
+  def dataConversion(x: (String, String, String, String, String)) : Tuple12[Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int] = {
     var myArray = Array(0,0,0,0,0,0,0,0,0,0,0,0);
 
     if(x._1.toDouble >= 0){
@@ -99,5 +75,19 @@ object mainDataConversion {
   }
 
 
+  def toCSVLine(x: Tuple12[Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int]): String = {
+    x.productIterator.mkString(",")
+  }
+
+  def saveAsCSVFile(rdd: RDD[(Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int)]) = {
+    val pwCSV = new PrintWriter(
+      new File("src/main/resources/dataset_dataConversion.csv")
+    )
+    pwCSV.write("SH,NH,Q1,Q2,Q3,Q4,LOW_MAG,MED_MAG,HIGH_MAG,LOW_DEPTH,MED_DEPTH,HIGH_DEPTH" + "\n")
+    rdd.collect().foreach(x => {
+      pwCSV.write(toCSVLine(x) + "\n")
+    })
+    pwCSV.close()
+  }
 
 }
