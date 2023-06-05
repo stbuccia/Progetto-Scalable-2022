@@ -27,11 +27,6 @@ class AprioriSpark(t: List[Set[String]], m: Int) extends java.io.Serializable wi
       .filter(item => item._2 > minSupport) 
 
     setL_k
-    //if (setL_k.count() == 0)
-      //setC_k
-    //else 
-      //phase2(transactionsRdd, k + 1, setL_k)
-    
   }
 
   def run() = {

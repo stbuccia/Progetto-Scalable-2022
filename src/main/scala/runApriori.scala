@@ -29,23 +29,13 @@ object runApriori /*extends App*/ {
     }.toSet
   }.toList
 
-  // Print the transactions
-  transactions.foreach(println)
-  //val transactions = List(
-  //  Set("A", "B", "C", "D"),
-  //  Set("A" ,"B", "D"), 
-  //  Set("A", "B"), 
-  //  Set("B", "C", "D"), 
-  //  Set("C", "D"), 
-  //  Set("B", "D"), 
-  //)
- 
-  //TODO: Creare un'interfaccia Apriori e ogni algoritmo di fatto diventa una classe
-  //val alg1 = new AprioriSeq(transactions, 2)
-  val alg2 = new AprioriSparkSPC(transactions, 1)
+  val threshold = 0.1
+  val minSupport = (threshold * transactions.length).toInt
+  val alg2 = new AprioriSparkSPC(transactions, minSupport)
 
   def main(args: Array[String]) = {
-    //System.out.println(alg1.run())
+    System.out.println("Relative minSupport: " + minSupport)
+    System.out.println("Absolute minSupport: " + threshold)
     alg2.run()
   }
 }

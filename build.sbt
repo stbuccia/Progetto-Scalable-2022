@@ -13,7 +13,8 @@ ThisBuild / libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-mllib" % "3.2.1",
       "org.scalanlp" %% "breeze" % "1.1",
       "org.scalanlp" %% "breeze-natives" % "1.1",
-      "org.scalanlp" %% "breeze-viz" % "1.1"
+      "org.scalanlp" %% "breeze-viz" % "1.1",
+      "log4j" % "log4j" % "1.2.14"
     ),
 
 

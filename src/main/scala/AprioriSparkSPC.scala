@@ -12,7 +12,7 @@ class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
     if (setL_k.count() == 0)
       setL
     else 
-      recursivePhase2(transactionsRdd, k + 1, setL_k)
+      recursivePhase2(transactionsRdd, k + 1, setL.union(setL_k))
   }
 
   override def run() = {
@@ -23,9 +23,10 @@ class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
     val transactionsRdd = sc.parallelize(transactions)
 
     val setL_1 = phase1(transactionsRdd)
-    val setL_2 = phase2(transactionsRdd, 2, setL_1)
+    val setL_2 = setL_1.union(phase2(transactionsRdd, 2, setL_1))
 
     val out = recursivePhase2(transactionsRdd, 3, setL_2)
     out.collect().foreach(println)
+    sc.stop()
   }
 }
