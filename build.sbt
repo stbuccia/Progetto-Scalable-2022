@@ -18,6 +18,9 @@ lazy val root = (project in file("."))
 resolvers += Resolver.bintrayRepo("cibotech", "public")
 libraryDependencies += "io.github.cibotech" %% "evilplot" % "0.8.1"
 
+// log4j
+libraryDependencies += "log4j" % "log4j" % "1.2.14"
+
 //ThisBuild / version := "0.1.0-SNAPSHOT"
 //
 //ThisBuild / scalaVersion := "2.13.8"

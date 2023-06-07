@@ -1,15 +1,16 @@
-import org.apache.spark.{SparkConf, SparkContext}
+package Clustering
+
+import com.cibo.evilplot.colors._
+import com.cibo.evilplot.demo.DemoPlots.theme
+import com.cibo.evilplot.numeric._
+import com.cibo.evilplot.plot._
 import org.apache.spark.mllib.clustering.KMeans
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
-import com.cibo.evilplot.plot._
-import com.cibo.evilplot.numeric._
-import com.cibo.evilplot.colors._
-import com.cibo.evilplot.demo.DemoPlots.theme
+import org.apache.spark.{SparkConf, SparkContext}
 
-import scala.io.Source
 import java.io.File
+import scala.io.Source
 
 
 /**
@@ -30,7 +31,7 @@ object EarthquakeKMeans {
 
     /**
    * Creates a lineplot with the WSSSE obtained for different number of clusters
-   * @param wss_list
+   * @param wss_list list of wss calculated for each numnber of clusters
    * @param clusters_range min - max number of cluster tested
    * @param filename output filename
    */
@@ -63,9 +64,6 @@ object EarthquakeKMeans {
       num_centroids <- clusters_range
       // compute kmeans
       clusters = KMeans.train(input_data_points, num_centroids, num_iteration)
-      //(centroids, clustered_points) = time(f(input_data_points, num_centroids, epsilon))
-      // sort the list of centroids
-      //sorted_centroids = centroids.sortBy(centroid => centroid._1).map(centroid => centroid._2)
       // compute the "error" measure
       wss = clusters.computeCost(input_data_points)
     } yield wss
@@ -73,21 +71,29 @@ object EarthquakeKMeans {
     saveElbowLinePlot(wss_list, clusters_range, filename)
   }
 
+  /**
+   * Divides data in clusters
+   * @param sc Spark Context
+   * @param dataFilePath  input data file location
+   * @param column  column index from where read the data
+   * @param numClusters number of clusters we want to get
+   * @param numIterations maximum number of iteration the algorithm can do
+   * @param modelName name of the returned model
+   * @return
+   */
   def kMeansClustering(sc: SparkContext, dataFilePath: String, column: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
       val src = getResourceFile(dataFilePath).filter(_.nonEmpty).drop(1).toList
       val textData = sc.parallelize(src)
-      val magColumn = 3
       val parsedData = textData
         .map(_.split(",")(column))
-        .map(_.toDouble) 
-        //.map(Vectors.dense)
+        .map(_.toDouble)
         .cache()
 
       val vectors: RDD[org.apache.spark.mllib.linalg.Vector] = parsedData.map(value => Vectors.dense(value))
 
       println("Clustering...")
 
-      // Cluster the data into two classes using KMeans
+      // Cluster the data using KMeans
       val clusters = KMeans.train(vectors, numClusters, numIterations) // returns a KMeansModel obj
 
 
@@ -134,7 +140,7 @@ object EarthquakeKMeans {
 
     println("Started")
 
-    val appName = "EarthquakeKMeans"
+    val appName = "Clustering.EarthquakeKMeans"
     val master = "local" // or "local[2]"
     val conf = new SparkConf()
       .setAppName(appName)
@@ -144,7 +150,6 @@ object EarthquakeKMeans {
     println("Loading Earthquake data...")
 
     val discretizedDataMag: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 3, 5, 20, "clusteredDataMag")
-    val discretizedDataDepth: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 2, 6, 20, "clusteredDataDepth")
   }
 }
 

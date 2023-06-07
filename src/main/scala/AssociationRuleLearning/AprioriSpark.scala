@@ -1,7 +1,6 @@
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.storage.StorageLevel
+package AssociationRuleLearning
+
 import org.apache.spark.rdd.RDD
-import scala.annotation.tailrec
 
 class AprioriSpark(t: List[Set[String]], m: Int) extends java.io.Serializable with Apriori {
 

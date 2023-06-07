@@ -1,8 +1,9 @@
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.storage.StorageLevel
+package AssociationRuleLearning
+
 import org.apache.spark.rdd.RDD
+import org.apache.spark.{SparkConf, SparkContext}
+
 import scala.annotation.tailrec
-import com.fasterxml.jackson.module.scala.deser.overrides
 
 class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
 

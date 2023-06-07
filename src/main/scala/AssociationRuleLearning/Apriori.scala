@@ -1,6 +1,8 @@
+package AssociationRuleLearning
+
 trait Apriori {
   var transactions: Seq[Set[String]]
   var minSupport: Int
 
-  def run(): Any 
+  def run(): Any
 }

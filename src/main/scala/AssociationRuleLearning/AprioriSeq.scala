@@ -1,6 +1,8 @@
+package AssociationRuleLearning
 
-/* Implementation of Sequential Apriori
-  Inspired by wikipedia page and "Apriori-Map/Reduce Algorithm", J. Woo paper
+
+/* Implementation of Sequential AssociationRuleLearning.Apriori
+  Inspired by wikipedia page and "AssociationRuleLearning.Apriori-Map/Reduce Algorithm", J. Woo paper
  */
 
 class AprioriSeq(t: List[Set[String]], m: Int) extends java.io.Serializable with Apriori {
