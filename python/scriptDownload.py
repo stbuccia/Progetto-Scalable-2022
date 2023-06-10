@@ -3,7 +3,7 @@ from urllib import request
 from urllib.error import HTTPError, URLError
 
 # Estremi compresi
-startYear = 2010
+startYear = 1990
 endYear = 2022
 
 local_path = 'download/'

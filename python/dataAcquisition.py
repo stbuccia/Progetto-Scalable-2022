@@ -41,6 +41,7 @@ df.drop(labels=labelsToDrop, axis=1, inplace=True)
 # scrivi file di output
 start = inputFiles[0][:7].replace('-','_')
 end = inputFiles[len(inputFiles)-1][:7].replace('-','_')
-fileName = 'dataset_from_' +start +'_to_' +end +'.csv'
+#fileName = 'dataset_from_' +start +'_to_' +end +'.csv'
+fileName = 'test_2.5.csv'
 df.to_csv(csv_path_output + fileName, index=False) 
 print("Nuovo file creato: ", csv_path_output + fileName)
