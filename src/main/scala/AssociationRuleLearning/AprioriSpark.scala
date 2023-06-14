@@ -2,10 +2,19 @@ package AssociationRuleLearning
 
 import org.apache.spark.rdd.RDD
 
-class AprioriSpark(t: List[Set[String]], m: Int) extends java.io.Serializable with Apriori {
+/**
+ *
+ * @param t
+ * @param m
+ * @param n
+ *
+ * todo: togliere abstract e implementare correttamente il trait
+ */
+abstract class AprioriSpark(t: List[Set[String]], m: Int, n: Double) extends java.io.Serializable with Apriori {
 
   var transactions: Seq[Set[String]] = t
   var minSupport: Int = m
+  var minConfidence: Double = n
 
   protected def phase1(transactionsRdd: RDD[Set[String]]) = {
     transactionsRdd.flatMap(itemset => itemset.map(item => (Set(item), 1))).reduceByKey((x, y) => x + y).filter(item => item._2 > minSupport)

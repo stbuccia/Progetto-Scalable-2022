@@ -5,11 +5,20 @@ package AssociationRuleLearning
   Inspired by wikipedia page and "AssociationRuleLearning.Apriori-Map/Reduce Algorithm", J. Woo paper
  */
 
-class AprioriSeqMapReduce(t: List[Set[String]], m: Int, n: Int) extends java.io.Serializable with Apriori {
+
+/**
+ *
+ * @param t
+ * @param m
+ * @param n
+ *
+ * todo: togliere abstract e implementare correttamente il trait
+ */
+abstract class AprioriSeqMapReduce(t: List[Set[String]], m: Int, n: Double) extends java.io.Serializable with Apriori {
 
   var transactions: Seq[Set[String]] = t
   var minSupport: Int = m
-  var minConfidence: Int = n
+  var minConfidence: Double = n
 
   // joinSort(HashSet(Set(1), Set(2), Set(3), Set(4)), 1)
   //    => HashSet(Set(3), Set(1), Set(4), Set(2))

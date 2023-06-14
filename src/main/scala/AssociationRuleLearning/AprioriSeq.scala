@@ -6,61 +6,106 @@ import scala.util.control.Breaks
 import scala.util.control.Breaks.{break, breakable}
 
 /**
- * Class for sequantial version of Apriori algorithm
+ * Class for sequential version of Apriori algorithm
  * @param inputDataFile file that contains Data - i.e. list of itemset, transactions
  *
  * todo: capire perché per usare il trait dobbiamo anche estendere qualcosa...
  * todo: siccome la lettura dal file viene fatta in modo ridondante sia qua che nel Kmeans, creare una classe di utility col metodo
  */
-class AprioriSeq(inputDataFile: File, support: Int, confidence: Int) extends java.io.Serializable with Apriori{
+class AprioriSeq(inputDataFile: File, threshold: Double, confidence: Double) extends java.io.Serializable with Apriori{
 
   // Set up transactions list from Input File
   override var transactions: Seq[Set[String]] = List()
 
-  var itemSet1 : Set[String] = Set()   // creating 1 dimensional itemset
+  var itemSet : Set[String] = Set()   // creating 1 dimensional itemset
   val src: List[String] = Source.fromFile(inputDataFile).getLines().filter(_.nonEmpty).drop(1).toList
   for (line<-src) {
+    println("Reading a line from input file.. ")
     val lineSet = line.trim.split(',').toSet
     if (lineSet.nonEmpty) {
       transactions = transactions :+ lineSet
-      itemSet1 = itemSet1 ++ lineSet  // it won't have duplicates because of Scala Set class implementation
+      itemSet = itemSet ++ lineSet  // it won't have duplicates because of Scala Set class implementation
     }
   }
 
   // Set minimum support and minimum confidence
-  override var minSupport: Int = support
-  override var minConfidence: Int = confidence
+  override var minSupport: Int = (threshold * transactions.length).toInt
+  override var minConfidence: Double = confidence
+
+  // Define global vars
+  var generatedItemsets : Map[Set[String], Int] = Map()
+  var singletonSet: Set[Set[String]] = itemSet.subsets().filter(_.size == 1).toSet
+  for(singleton<-singletonSet) {
+    generatedItemsets += (singleton->getSupport(singleton))
+  }
+
+  var frequentItemsets: Set[Set[String]] = Set()
+  var associationRules : List[(Set[String], Set[String], Double)] = List()
+
+
+  /**
+   * Counts the occurences of the given itemset inside the dataset
+   * @param itemset set of items appearing inside the dataset
+   * @return  number of times the given itemset appears
+   */
+  def getSupport(itemset : Set[String]) : Int = {
+    transactions.count(transaction => itemset.subsetOf(transaction))
+    // count.toDouble / transactions.size.toDouble
+  }
 
 
   /**
    * Prunes a given Candidates Set by checking if its subsets satisfy the minimum support.
-   * @param candidatesSet
-   * @return
+   * @param candidatesSet set of itemsets, counting the support for each one of them
+   * @return  subset of candidatesSet where only the ones whose subsets satisfy the minimum support are left
    */
-//  private def prune(candidatesSet: Set[Set[String]]): Set[Set[String]] = {
-//
-//  }
+  private def prune(candidatesSet: Set[(Set[String],Int)]): Set[(Set[String],Int)] = {
+    candidatesSet.filter(pair => transactions.count(pair._1.subsetOf(_)) >= minSupport)
+  }
+
+  private def generateAssociationRules(): Unit = {
+    frequentItemsets.foreach(itemset =>
+      itemset.subsets.filter(subset => (subset.nonEmpty & subset.size < itemset.size))
+        .foreach(subset => {associationRules = associationRules :+ (subset, itemset diff subset,
+                                                                       generatedItemsets(itemset).toDouble/generatedItemsets(subset).toDouble)}
+    ))
+    associationRules = associationRules.filter( rule => rule._3>=minConfidence)
+  }
 
   def run(): Unit = {
+
+    // Find frequent itemsets
     var k = 2
-    var currentLSet = itemSet1
-    var candidatesSet = currentLSet.subsets().filter(_.size == k).toSet
-    println(candidatesSet)
-//    breakable {
-//      while (true) {
-//        var candidatesSet = currentLSet.subsets().filter(_.size == k).toSet
-//        println(candidatesSet)
-//        val currentItemCombs : Set[(Set[String], Double)] = currentCSet.map( wordSet => (wordSet, getSupport(wordSet)))
-//                                          .filter( wordSetSupportPair => (wordSetSupportPair._2 > minSupport))
-//        val currentLSet = currentItemCombs.map( wordSetSupportPair => wordSetSupportPair._1).toSet
-//        if (currentLSet.isEmpty) break
-//        currentCSet = currentLSet.map( wordSet => currentLSet.map(wordSet1 => wordSet | wordSet1))
-//                                                            .reduceRight( (set1, set2) => set1 | set2)
-//                                                            .filter( wordSet => (wordSet.size==k))
-//        itemCombs = itemCombs | currentItemCombs
-//        k += 1
-//      }
-//  }
+    breakable {
+      while (true) {
+        println("Searching for " + k + " dimensional frequent itemsets")
+
+        // Creating a set of all the possible subsets of dimension k
+        val joinSet = itemSet.subsets().filter(_.size == k).toSet
+
+        // Deleting itemsets which do not satisfy minimum support
+        var candidatesSet = joinSet.map(itemset => (itemset, getSupport(itemset)))
+          .filter(pair => pair._2 >= minSupport)
+
+        // Deleting itemsets whose subsets do not satisfy minimum support
+        candidatesSet = prune(candidatesSet)
+
+        // Stop if there are no other itemsets
+        if (candidatesSet.isEmpty) break
+
+        // Save the found itemsets and keep looking for others
+        for(itemset<-candidatesSet) {
+          generatedItemsets += (itemset._1->itemset._2)
+        }
+        k += 1
+      }
+    }
+
+    // Save frequent itemsets
+    frequentItemsets = generatedItemsets.keySet.filter(itemset => itemset.size == k-1)
+
+    // Generate association rules
+    generateAssociationRules()
   }
 
 }

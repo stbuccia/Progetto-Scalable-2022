@@ -5,7 +5,15 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.annotation.tailrec
 
-class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
+/**
+ *
+ * @param t
+ * @param m
+ * @param n
+ *
+ * todo: togliere abstract e implementare correttamente il trait
+ */
+abstract class AprioriSparkSPC(t: List[Set[String]], m: Int, n: Double) extends AprioriSpark(t, m, n) {
 
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
