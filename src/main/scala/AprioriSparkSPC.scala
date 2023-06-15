@@ -22,7 +22,7 @@ class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
       val subsets = itemset.subsets().toList.filter(_.nonEmpty).filter(_.size == itemset.size - 1)
       subsets.map { subset =>
         val remaining = itemset -- subset //Should have size == 1
-        val confidence = support.toDouble / frequentItemsets.filter(_._1 == subset).map(_._2).first()
+        val confidence = support.toDouble / frequentItemsetsList.filter(_._1 == subset).map(_._2).head
         (subset, remaining, confidence)
       }
     }
