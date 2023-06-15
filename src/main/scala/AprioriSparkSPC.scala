@@ -15,6 +15,21 @@ class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
       recursivePhase2(transactionsRdd, k + 1, setL.union(setL_k))
   }
 
+  private def generateAssociationRules(frequentItemsets: RDD[(Set[String], Int)], minConfidence: Double): RDD[(Set[String], Set[String], Double)] = {
+    val frequentItemsetsList = frequentItemsets.collect() 
+
+    val associationRules = frequentItemsets.flatMap { case (itemset, support) =>
+      val subsets = itemset.subsets().toList.filter(_.nonEmpty).filter(_.size == itemset.size - 1)
+      subsets.map { subset =>
+        val remaining = itemset -- subset //Should have size == 1
+        val confidence = support.toDouble / frequentItemsets.filter(_._1 == subset).map(_._2).first()
+        (subset, remaining, confidence)
+      }
+    }
+    // Filter rules based on confidence
+    associationRules.filter(_._3 >= minConfidence)
+  }
+
   override def run() = {
     //TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)
     val conf = new SparkConf().setAppName("apriori-sequential").setMaster("local[1]")
@@ -27,6 +42,18 @@ class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
 
     val out = recursivePhase2(transactionsRdd, 3, setL_2)
     out.collect().foreach(println)
+
+
+    val frequentItemsets: RDD[(Set[String], Int)] = out // Your RDD of frequent itemsets
+    val minConfidence: Double = 0.7 // Minimum confidence threshold
+
+    val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(frequentItemsets, minConfidence)
+
+    // Print the association rules
+    associationRules.foreach { case (lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
+
     sc.stop()
   }
 }
