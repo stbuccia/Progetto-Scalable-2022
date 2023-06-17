@@ -1,11 +1,11 @@
 .bloop
 .bsp
-.idea/*
 .idea
+.idea/*
+project
+project/*
 src/project
 src/test
 src/main/scala/project
-project
-project/*
 target
 target/*
