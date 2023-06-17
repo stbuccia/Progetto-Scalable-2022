@@ -1,8 +1,11 @@
+.bloop
+.bsp
 .idea/*
 .idea
+src/project
+src/test
+src/main/scala/project
+project
+project/*
 target
 target/*
-.bloop
-.metals
-project/*
-download

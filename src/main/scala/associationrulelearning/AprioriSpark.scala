@@ -1,4 +1,4 @@
-package AssociationRuleLearning
+package associationrulelearning
 
 import org.apache.spark.rdd.RDD
 

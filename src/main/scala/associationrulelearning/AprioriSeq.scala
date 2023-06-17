@@ -1,4 +1,4 @@
-package AssociationRuleLearning
+package associationrulelearning
 
 import java.io.File
 import scala.io.Source

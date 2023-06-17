@@ -1,4 +1,4 @@
-package AssociationRuleLearning
+package associationrulelearning
 
 import java.io.File
 
@@ -39,7 +39,7 @@ object runApriori /*extends App*/ {
     println("Creating algorithm instance..")
 
     // Prova per eseguire senza chiamata da linea di comando, fornendo il datapath
-    val alg = new AprioriSeq(new File("/home/melania/Documents/UNI-BOH/2 ANNO/SCP/progetto/Progetto-Scalable-2022/src/main/resources/dataset_2010_2021_dataConversion_label.csv"), 0.06, 0.6)
+    val alg = new AprioriSeq(new File("/home/melania/Documents/UNI-BOH/2 ANNO/SCP/progetto/Progetto-Scalable-2022/src/main/resources/dataset_2010_2021_dataConversion_label.csv"), 0.6, 0.7)
 
     println("Algorithm instance created. Going to run..")
 
@@ -51,7 +51,8 @@ object runApriori /*extends App*/ {
     println("===Frequent Itemsets===")
     alg.frequentItemsets.foreach(println)
     println("===Association Rules===")
-    alg.associationRules.foreach(println)
+    alg.associationRules.
+      foreach(println)
   }
 
 }

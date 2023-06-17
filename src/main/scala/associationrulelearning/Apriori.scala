@@ -1,4 +1,4 @@
-package AssociationRuleLearning
+package associationrulelearning
 
 trait Apriori {
   var transactions: Seq[Set[String]]

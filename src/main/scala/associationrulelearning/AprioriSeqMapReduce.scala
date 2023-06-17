@@ -1,4 +1,4 @@
-package AssociationRuleLearning
+package associationrulelearning
 
 
 /* Implementation of Sequential AssociationRuleLearning.Apriori

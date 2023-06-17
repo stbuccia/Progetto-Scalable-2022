@@ -1,4 +1,4 @@
-package Clustering
+package clustering
 
 import com.cibo.evilplot.colors._
 import com.cibo.evilplot.demo.DemoPlots.theme
