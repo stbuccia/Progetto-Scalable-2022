@@ -7,18 +7,8 @@ import org.apache.spark.ml.fpm.{FPGrowth, FPGrowthModel}
 
 import scala.io.Source
 
-// @TODO: learn how we parse data in spark context
 
-/**
- *
- * Implements a KMeans clustering model for Iris dataset
- *
- * The outputs shows, for each cluster, the center of each feature.
- * Recall that the features are: sepal lenght, sepal width, petal lenght and petal width
- *
- */
-
-object FPGrowthExample {
+object FPGrowth {
 
     def main(args: Array[String]): Unit = {
     // Set up Spark session
@@ -26,12 +16,6 @@ object FPGrowthExample {
       .appName("FPGrowthExample")
       .master("local[1]")
       .getOrCreate()
-
-    //val conf = new SparkConf().setAppName("apriori").setMaster("local[1]")
-    //conf.set("spark.driver.allowMultipleContexts","true");
-    //val sc = new SparkContext(conf)
-
-    //val csvPath = "/home/stefano/IdeaProjects/Progetto-Scalable-2022/src/main/resources/output.csv"
 
     val csvPath = "/home/stefano/IdeaProjects/Progetto-Scalable-2022/src/main/resources/dataset_2010_2021_dataConversion_label.csv"
     val lines = Source.fromFile(csvPath).getLines()
@@ -72,7 +56,7 @@ object FPGrowthExample {
     val transactionsDF: DataFrame = transactions.toDF("items")
 
     // Apply the Apriori algorithm
-    val minSupport = 0.5 // Minimum support threshold
+    val minSupport = 0.6 // Minimum support threshold
     val fpGrowth = new FPGrowth()
       .setItemsCol("items")
       .setMinSupport(minSupport)

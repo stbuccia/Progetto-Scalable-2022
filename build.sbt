@@ -15,7 +15,12 @@ ThisBuild / libraryDependencies ++= Seq(
       "org.scalanlp" %% "breeze-natives" % "1.1",
       "org.scalanlp" %% "breeze-viz" % "1.1",
       "log4j" % "log4j" % "1.2.14"
-    ),
+    );
+
+// evilplot
+resolvers += Resolver.bintrayRepo("cibotech", "public")
+libraryDependencies += "io.github.cibotech" %% "evilplot" % "0.8.1"
+
 
 
 

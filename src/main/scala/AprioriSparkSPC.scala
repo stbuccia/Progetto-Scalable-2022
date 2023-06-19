@@ -19,15 +19,15 @@ class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
     val frequentItemsetsList = frequentItemsets.collect() 
 
     val associationRules = frequentItemsets.flatMap { case (itemset, support) =>
-      val subsets = itemset.subsets().toList.filter(_.nonEmpty).filter(_.size == itemset.size - 1)
+      val subsets = itemset.subsets().toList.filter(_.nonEmpty)//.filter(_.size == itemset.size - 1)
       subsets.map { subset =>
-        val remaining = itemset -- subset //Should have size == 1
+        val remaining = itemset -- subset
         val confidence = support.toDouble / frequentItemsetsList.filter(_._1 == subset).map(_._2).head
         (subset, remaining, confidence)
       }
     }
     // Filter rules based on confidence
-    associationRules.filter(_._3 >= minConfidence)
+    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence)
   }
 
   override def run() = {
