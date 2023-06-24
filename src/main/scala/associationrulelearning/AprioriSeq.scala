@@ -1,5 +1,8 @@
 package associationrulelearning
 
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+
 import java.io.File
 import scala.io.Source
 import scala.util.control.Breaks
@@ -7,26 +10,18 @@ import scala.util.control.Breaks.{break, breakable}
 
 /**
  * Class for sequential version of Apriori algorithm
- * @param inputDataFile file that contains Data - i.e. list of itemset, transactions
+ * @param dataFilePath path of the file that contains Data - i.e. list of itemset, transactions
  *
  * todo: capire perché per usare il trait dobbiamo anche estendere qualcosa...
  * todo: siccome la lettura dal file viene fatta in modo ridondante sia qua che nel Kmeans, creare una classe di utility col metodo
  */
-class AprioriSeq(inputDataFile: File, threshold: Double, confidence: Double) extends java.io.Serializable with Apriori{
+class AprioriSeq(dataFilePath: String, threshold: Double, confidence: Double, context: SparkContext) extends Serializable with Apriori {
 
   // Set up transactions list from Input File
-  override var transactions: Seq[Set[String]] = List()
-
-  var itemSet : Set[String] = Set()   // creating 1 dimensional itemset
-  val src: List[String] = Source.fromFile(inputDataFile).getLines().filter(_.nonEmpty).drop(1).toList
-  for (line<-src) {
-    println("Reading a line from input file.. ")
-    val lineSet = line.trim.split(',').toSet
-    if (lineSet.nonEmpty) {
-      transactions = transactions :+ lineSet
-      itemSet = itemSet ++ lineSet  // it won't have duplicates because of Scala Set class implementation
-    }
-  }
+  val rdd: RDD[Set[String]] = context.textFile(dataFilePath)
+      .map( x => x.split(",") )
+      .map(_.toSet)
+  override var transactions: Seq[Set[String]] = rdd.collect().toSeq
 
   // Set minimum support and minimum confidence
   override var minSupport: Int = (threshold * transactions.length).toInt
