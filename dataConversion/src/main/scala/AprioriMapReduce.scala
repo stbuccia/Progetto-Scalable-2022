@@ -17,10 +17,11 @@ object AprioriMapReduce {
     val min_support = 0.6
     val confidence = 0.7
     val labelSet: Set[String] = Set("SH", "NH", "Q1", "Q2", "Q3", "Q4", "LOW_MAG", "MED_MAG", "HIGH_MAG", "LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
-    val inputFilePath = "src/main/resources/dataset_1990_2022_dataConversion_label.csv"
+    //val inputFilePath = "src/main/resources/dataset_1990_2022_dataConversion_label.csv"
+    val inputFilePath = "src/main/resources/dataset_2010_2021_dataConversion_label.csv"
 
     println("Read CSV file...")
-    val rdd = time(readCSV(sc, inputFilePath)).filter(x => Set("LOW_MAG").subsetOf(x))
+    val rdd = time(readCSV(sc, inputFilePath))//.filter(x => Set("MED_MAG").subsetOf(x))
     val rdd_size = rdd.count().toDouble
 
 
@@ -79,7 +80,7 @@ object AprioriMapReduce {
     val output = rdd
       .flatMap( x => x.map( y => (Set(y),1) ) )
       .reduceByKey( (x,y) => x + y)
-      .filter( x =>  (x._2 / rdd_size) >= min_sup )
+      .filter( x =>  (x._2.toDouble / rdd_size) >= min_sup )
       .collect()
     printItemsets(output, rdd_size)
     output
@@ -114,7 +115,7 @@ object AprioriMapReduce {
       .filter( x => itemset.subsetOf(x) )
       .map( x => (itemset, 1) )
       .reduceByKey( (x, y) => x + y )
-      .filter( x => (x._2 / rdd_size) >= min_sup )
+      .filter( x => (x._2.toDouble / rdd_size) >= min_sup )
       //.collect()
   }
 /*
@@ -164,7 +165,7 @@ object AprioriMapReduce {
       .filter(x => subItemset.subsetOf(x))
       .map(x => (subItemset, 1))
       .reduceByKey((x, y) => x + y)
-      .map(x => (x._1, itemset -- subItemset, itemset_support / x._2.toDouble))
+      .map(x => (x._1, itemset -- subItemset, itemset_support.toDouble / x._2.toDouble))
       .filter(x => x._3 >= confidence)
 /*
     val reverseRules = rdd

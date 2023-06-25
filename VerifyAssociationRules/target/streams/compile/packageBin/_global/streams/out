@@ -1,0 +1,17 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/verifyassociationrules_2.13-0.1.0-SNAPSHOT.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/Main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	log4j.properties[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/log4j.properties[0m
+[0m[[0m[0mdebug[0m] [0m[0m	dataset_1990_2022_dataConversion_label.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/dataset_1990_2022_dataConversion_label.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	dataset_2010_2021_dataConversion_label.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/dataset_2010_2021_dataConversion_label.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	rules_support_60.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/rules_support_60.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Main$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/Main$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	rules_support_6.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/gianluigi/Scrivania/Progetto-Scalable-2022/VerifyAssociationRules/target/scala-2.13/classes/rules_support_6.csv[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m
