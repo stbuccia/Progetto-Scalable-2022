@@ -1,9 +1,7 @@
-import associationrulelearning.runApriori
 import associationrulelearning.runApriori.runAprioriSeq
-import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
-import clustering.EarthquakeKMeans
 import clustering.EarthquakeKMeans.kMeansClustering
+import org.apache.spark.sql.SparkSession
 
 import java.io.File
 
@@ -11,23 +9,52 @@ object Main{
 
   def main(args: Array[String]): Unit = {
 
+
     // Check arguments
+    if (args.length != 3) {
+      println("Missing arguments!")
+      System.exit(1)
+    }
+
+    val master = args(0)
+    val datasetPath = args(1)
+    val outputFolder = args(2)
+
+    println("Configuration:")
+    println(s"- master: $master")
+    println(s"- dataset path: $datasetPath")
+    println(s"- output folder: $outputFolder")
+
 
     // Initiate Spark Session/Context
 
     println("Started")
 
     val appName = "AssociationRuleLearning.Apriori"
-    val master = "local" // or "local[2]"
-    val conf = new SparkConf()
-      .setAppName(appName)
-      .setMaster(master)
-    val sc = new SparkContext(conf)
+    //val master = "local" // or "local[2]"
+    val sparkSession = SparkSession.builder()
+      .appName(appName)
+      .master(master)
+      .getOrCreate()
+    val sc = sparkSession.sparkContext
+
+
+    // Load dataset
+
+    val datasetDF = sparkSession.read
+      .option("delimiter",",")
+      .option("header", value = true)
+      .csv(datasetPath)
+
 
     // Run clustering and normalize data
 
-    val datasetFilePath = "/dataset_from_2010_01_to_2021_12.csv"
-    kMeansClustering(sc, datasetFilePath, 3, 5, 20, "clusteredDataMag")
+    val clusteredData = kMeansClustering(sc, datasetDF, 3, 5, 20, "clusteredDataMag")
+
+
+    // Update data with the clusters info
+
+    //val clusteredDataset = datasetDF.intersect(sparkSession.createDataFrame())
 
     // Run algorithms
 

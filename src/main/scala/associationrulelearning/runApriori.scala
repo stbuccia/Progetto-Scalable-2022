@@ -17,7 +17,7 @@ object runApriori {
   def runAprioriSeq(sc: SparkContext, filePath: String) : Unit = {
 
     // Creates an algorithm instance
-    val alg = new AprioriSeq(filePath, 0.06, 0.7, sc)
+    val alg = new AprioriSeq(filePath, 0.6, 0.7, sc)
 
     println("Algorithm instance created. Going to run for dataset " + filePath)
     alg.run()

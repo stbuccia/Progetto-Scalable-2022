@@ -8,6 +8,7 @@ import org.apache.spark.mllib.clustering.KMeans
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
+import org.apache.spark.sql.{DataFrame, Row}
 
 import java.io.{File, PrintWriter}
 import scala.io.Source
@@ -19,6 +20,7 @@ import scala.io.Source
  *
  * The outputs shows, for each cluster, the center of each feature.
  * Recall that the features are: latitude, longitude, depth, mag and year
+ *
  *
  */
 
@@ -97,29 +99,28 @@ object EarthquakeKMeans {
    * For each cluster it generates a subset of the given dataset, and save it in the /src/main/resources folder.
    *
    * @param sc Spark Context
-   * @param dataFilePath  input data file location
+   * @param datasetDF  dataset file in Spark DataFrame format
    * @param column  column index from where read the data
    * @param numClusters number of clusters we want to get
    * @param numIterations maximum number of iteration the algorithm can do
    * @param modelName name of the returned model
    * @return an RDD containing every data associated with its cluster, in the form (Value, Cluster_Index)
    */
-  def kMeansClustering(sc: SparkContext, dataFilePath: String, column: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
+  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, column: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
 
-    println("Loading dataset...")
+    // Loading dataset
 
-    val src = getResourceFile(dataFilePath).filter(_.nonEmpty).drop(1).toList
-    val textData = sc.parallelize(src)
-    val parsedData = textData
-      .map(_.split(","))
-      .cache()
+//    val src = getResourceFile(dataFilePath).filter(_.nonEmpty).drop(1).toList
+//    val textData = sc.parallelize(src)
+//    val parsedData = textData
+//      .map(_.split(","))
+//      .cache()
 
-    val columnData: RDD[Double] = parsedData.map(fields => fields(column).toDouble)
+//    val columnData: RDD[Double] = parsedData.map(fields => fields(column).toDouble)
 
-    val vectors: RDD[org.apache.spark.mllib.linalg.Vector] = columnData.map(value => Vectors.dense(value))
+    val datasetColumn = datasetDF.rdd.map(row => row(column).toString.toDouble)
+    val vectors: RDD[org.apache.spark.mllib.linalg.Vector] = datasetColumn.map(value => Vectors.dense(value))
 
-
-    println("Clustering...")
 
     // Cluster the data using KMeans
     val clusters = KMeans.train(vectors, numClusters, numIterations) // returns a KMeansModel obj
@@ -155,32 +156,33 @@ object EarthquakeKMeans {
     }
 
     // Discretize the extracted column using the trained K-means model
-    val discretizedData: RDD[(Double, Int)] = columnData.map(value => {
+    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
       val vector = Vectors.dense(value)
       val clusterIndex = clusters.predict(vector)
       (value, clusterIndex)
     })
 
-    // Discretize the vector represented data using the K-means model
-    val discretizedData2 = parsedData.map(row => {
-      val value = row(column).toDouble
-      val vector = Vectors.dense(value)
-      val clusterIndex = clusters.predict(vector)
-      (row.mkString(","), clusterIndex)
-    })//.map { case (fields, clusterIndex) => (fields.mkString(","), clusterIndex) }
+//    // Discretize the vector represented data using the K-means model
+//    val discretizedData2 = parsedData.map(row => {
+//      val value = row(column).toDouble
+//      val vector = Vectors.dense(value)
+//      val clusterIndex = clusters.predict(vector)
+//      (row.mkString(","), clusterIndex)
+//    })//.map { case (fields, clusterIndex) => (fields.mkString(","), clusterIndex) }
 
 
-    // Write each cluster's data to separate files
-    for (clusterIndex <- 0 until numClusters) {
-      val clusterData = discretizedData2.filter { case (_, c) => c == clusterIndex }
-      //clusterData.saveAsTextFile(s"${modelName}_cluster$clusterIndex")
-      var filePath = "src/main/resources/dataset_2010_2021_cluster" + clusterIndex + ".csv"
-      writeRDDToCSV(clusterData, filePath);
-      dataconversion.mainDataConversion.normalizeDataset(sc, filePath)
-    }
+//    // Write each cluster's data to separate files
+//    for (clusterIndex <- 0 until numClusters) {
+//      val clusterData = discretizedData2.filter { case (_, c) => c == clusterIndex }
+//      //clusterData.saveAsTextFile(s"${modelName}_cluster$clusterIndex")
+//      var filePath = "src/main/resources/dataset_2010_2021_cluster" + clusterIndex + ".csv"
+//      writeRDDToCSV(clusterData, filePath);
+//      dataconversion.mainDataConversion.normalizeDataset(sc, filePath)
+//    }
 
     discretizedData
   }
+
 
 //  def main(args: Array[String]): Unit = {
 //
