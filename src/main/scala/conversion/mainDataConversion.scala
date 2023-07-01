@@ -22,20 +22,26 @@ object mainDataConversion {
     println("Check missing values...")
     rdd = handlerMissingValues(rdd)
 
-    val startYear = rdd.map(_._5.toInt).min()
-    val endYear = rdd.map(_._5.toInt).max()
+    //val startYear = rdd.map(_._5.toInt).min()
+    //val endYear = rdd.map(_._5.toInt).max()
 
-    println("Data conversion...")
-    val rdd_output = rdd.map(x => dataConversion(x))
+    //println("Data conversion...")
+    //val rdd_output = rdd.map(x => dataConversion(x))
 
-    println("Write CSV file with binary data...")
-    saveAsCSVFile(rdd_output, startYear, endYear, false)
+    RDDLabelConversion(rdd).collect().foreach(println)
+    //println("Write CSV file with binary data...")
+    //saveAsCSVFile(rdd_output, startYear, endYear, false)
 
-    println("Write CSV file with text data...")
-    saveAsCSVFile(rdd_output, startYear, endYear, true)
+    //println("Write CSV file with text data...")
+    //saveAsCSVFile(rdd_output, startYear, endYear, true)
 
 
   }
+
+  def RDDLabelConversion(transactions: RDD[(String,String,String,String,String )]) : RDD[(String, String, String, String)] = {
+    transactions.map(dataConversion).map(toTupleLineLabel)
+  }
+
 
   def readCSV(sc: SparkContext, path: String): RDD[(String,String,String,String,String )] = {
     val rdd = sc.textFile(path)
@@ -106,6 +112,20 @@ object mainDataConversion {
       i = i + 1
     }
     line.mkString(",")
+  }
+
+  def toTupleLineLabel(x: Tuple12[Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int]): (String, String, String, String) = {
+    var line = new Array[String](0)
+    val labelArray: Array[String] = Array("SH", "NH", "Q1", "Q2", "Q3", "Q4", "LOW_MAG", "MED_MAG", "HIGH_MAG", "LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
+    val lineArray: Array[Int] = x.productIterator.toArray.map(_.toString.toInt)
+    var i = 0;
+    for (n <- lineArray) {
+      if (n == 1) {
+        line :+= labelArray(i)
+      }
+      i = i + 1
+    }
+    (line(0), line(1), line(2), line(3))
   }
 
   def saveAsCSVFile(rdd: RDD[(Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int)],

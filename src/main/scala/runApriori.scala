@@ -4,7 +4,7 @@ object runApriori /*extends App*/ {
 
   // Read the CSV file
   //val csvPath = "/home/stefano/IdeaProjects/Progetto-Scalable-2022/src/main/resources/output.csv"
-  val csvPath = "src/main/resources/dataset_2010_2021_dataConversion_cluster0_label.csv"
+  val csvPath = "src/main/resources/dataset_2010_2021_dataConversion_cluster4_label.csv"
   val lines = Source.fromFile(csvPath).getLines()
 
   //// Convert the CSV lines to transactions (sets)
