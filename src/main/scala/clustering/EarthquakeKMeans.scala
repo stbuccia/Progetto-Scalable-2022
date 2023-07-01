@@ -100,13 +100,13 @@ object EarthquakeKMeans {
    *
    * @param sc Spark Context
    * @param datasetDF  dataset file in Spark DataFrame format
-   * @param column  column index from where read the data
+   * @param dimension  column index from where read the data
    * @param numClusters number of clusters we want to get
    * @param numIterations maximum number of iteration the algorithm can do
    * @param modelName name of the returned model
    * @return an RDD containing every data associated with its cluster, in the form (Value, Cluster_Index)
    */
-  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, column: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
+  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, dimension: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
 
     // Loading dataset
 
@@ -118,7 +118,7 @@ object EarthquakeKMeans {
 
 //    val columnData: RDD[Double] = parsedData.map(fields => fields(column).toDouble)
 
-    val datasetColumn = datasetDF.rdd.map(row => row(column).toString.toDouble)
+    val datasetColumn = datasetDF.rdd.map(row => row(dimension).toString.toDouble)
     val vectors: RDD[org.apache.spark.mllib.linalg.Vector] = datasetColumn.map(value => Vectors.dense(value))
 
 

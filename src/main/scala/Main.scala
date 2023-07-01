@@ -7,6 +7,7 @@ import java.io.File
 
 object Main{
 
+
   def main(args: Array[String]): Unit = {
 
 
@@ -46,15 +47,22 @@ object Main{
       .option("header", value = true)
       .csv(datasetPath)
 
+//    val datasetRDD = sc.textFile(datasetPath)
+//      .map(_.split(","))
+//      .cache()
+
 
     // Run clustering and normalize data
 
-    val clusteredData = kMeansClustering(sc, datasetDF, 3, 5, 20, "clusteredDataMag")
+    val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
+
+//    val keyValuedDataset = datasetRDD.map(entry => (entry, entry(attributeForClustering)))  // transforms the RDD in a key-valued one in order to easily perform join
+
+    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, 5, 20, "clusteredDataMag")
 
 
     // Update data with the clusters info
 
-    //val clusteredDataset = datasetDF.intersect(sparkSession.createDataFrame())
 
     // Run algorithms
 
