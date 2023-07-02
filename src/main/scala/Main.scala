@@ -1,9 +1,7 @@
 import associationrulelearning.runApriori.runAprioriSeq
-import org.apache.spark.{SparkConf, SparkContext}
 import clustering.EarthquakeKMeans.kMeansClustering
 import org.apache.spark.sql.SparkSession
 
-import java.io.File
 
 object Main{
 
@@ -47,31 +45,26 @@ object Main{
       .option("header", value = true)
       .csv(datasetPath)
 
-//    val datasetRDD = sc.textFile(datasetPath)
-//      .map(_.split(","))
-//      .cache()
 
-
-    // Run clustering and normalize data
+    // Run clustering and update data with cluster info
 
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
-
-//    val keyValuedDataset = datasetRDD.map(entry => (entry, entry(attributeForClustering)))  // transforms the RDD in a key-valued one in order to easily perform join
-
     val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, 5, 20, "clusteredDataMag")
 
 
-    // Update data with the clusters info
+    // Normalize data
 
 
-    // Run algorithms
+    // Run algorithm for each cluster
 
-    val folder = new File("src/main/resources/")
-    if (folder.exists && folder.isDirectory)
-      folder.listFiles
-        .filter(file => file.toString.contains("label"))
-        .toList
-        .foreach(file => runAprioriSeq(sc, file.getPath))
+//    val folder = new File("src/main/resources/")
+//    if (folder.exists && folder.isDirectory)
+//      folder.listFiles
+//        .filter(file => file.toString.contains("label"))
+//        .toList
+//        .foreach(file => runAprioriSeq(sc, file.getPath))
+
+
   }
 
 }

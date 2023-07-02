@@ -4,14 +4,14 @@ import com.cibo.evilplot.colors._
 import com.cibo.evilplot.demo.DemoPlots.theme
 import com.cibo.evilplot.numeric._
 import com.cibo.evilplot.plot._
+import model.Event
 import org.apache.spark.mllib.clustering.KMeans
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, Row}
 
-import java.io.{File, PrintWriter}
-import scala.io.Source
+import java.io.{File}
 
 
 /**
@@ -26,73 +26,6 @@ import scala.io.Source
 
 object EarthquakeKMeans {
 
-  def getResourceFile(filePath: String) = {
-
-    val is = getClass.getResourceAsStream(filePath)
-    Source.fromInputStream(is).getLines()
-  }
-
-    /**
-   * Creates a lineplot with the WSSSE obtained for different number of clusters
-   * @param wss_list list of wss calculated for each numnber of clusters
-   * @param clusters_range min - max number of cluster tested
-   * @param filename output filename
-   */
-  def saveElbowLinePlot(wss_list: Seq[Double], clusters_range: Seq[Int], filename: String) = {
-    println("Save elbow lineplot...")
-    val data = clusters_range.zip(wss_list).map(pair => Point(pair._1, pair._2))
-
-    LinePlot.series(data, "WSSSE elbow", HSL(210, 100, 56))
-      .xAxis().yAxis().frame()
-      .xLabel("Number of cluster")
-      .yLabel("WSSSE")
-      .render()
-      .write(new File(filename))
-  }
-
-
-  /**
-   * Compute the elbow graph by calculating the WSSSE for each number of clusters
-   * @param start min number of clusters
-   * @param end max number of clusters
-   * @param input_data_points RDD[points]
-   * @param num_iteration maxim number of iteration for KMeans algorithm
-   * @param filename png file in which the result will be saved
-   */
-  def computeElbow(start: Int, end: Int, input_data_points: RDD[org.apache.spark.mllib.linalg.Vector],
-                   num_iteration: Int, filename: String = "kmeans_elbow_plot.png"): Any = {
-
-    // (E) Elbow method to know the best number of clusters
-    val clusters_range = start to end
-    val wss_list = for{
-      num_centroids <- clusters_range
-      // compute kmeans
-      clusters = KMeans.train(input_data_points, num_centroids, num_iteration)
-      // compute the "error" measure
-      wss = clusters.computeCost(input_data_points)
-    } yield wss
-
-    saveElbowLinePlot(wss_list, clusters_range, filename)
-  }
-
-  /**
-   * Writes a given RDD into a CSV file.
-   * @param rdd input data to be written
-   * @param filePath  of the CSV file
-   */
-  def writeRDDToCSV(rdd: RDD[(String, Int)], filePath: String): Unit = {
-    val printWriter = new PrintWriter(new File(filePath))
-
-    // Write the data rows
-    rdd.collect().foreach { case (strValue, _) =>
-      val row = s"$strValue"
-      printWriter.write(row + "\n")
-    }
-
-    // Close the writer
-    printWriter.close()
-  }
-
 
   /**
    * Divides data in clusters.
@@ -106,7 +39,7 @@ object EarthquakeKMeans {
    * @param modelName name of the returned model
    * @return an RDD containing every data associated with its cluster, in the form (Value, Cluster_Index)
    */
-  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, dimension: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Double, Int)] = {
+  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, dimension: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Int, Event)] = {
 
     // Loading dataset
 
@@ -117,6 +50,8 @@ object EarthquakeKMeans {
 //      .cache()
 
 //    val columnData: RDD[Double] = parsedData.map(fields => fields(column).toDouble)
+
+    val datasetRDD = datasetDF.rdd.map(fromRowToRddEntry)
 
     val datasetColumn = datasetDF.rdd.map(row => row(dimension).toString.toDouble)
     val vectors: RDD[org.apache.spark.mllib.linalg.Vector] = datasetColumn.map(value => Vectors.dense(value))
@@ -162,6 +97,11 @@ object EarthquakeKMeans {
       (value, clusterIndex)
     })
 
+    // Build and return the dataset together with cluster information
+    val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
+
+    clusteredDataset.map(_._2)
+
 //    // Discretize the vector represented data using the K-means model
 //    val discretizedData2 = parsedData.map(row => {
 //      val value = row(column).toDouble
@@ -180,7 +120,74 @@ object EarthquakeKMeans {
 //      dataconversion.mainDataConversion.normalizeDataset(sc, filePath)
 //    }
 
-    discretizedData
+  }
+
+      /**
+   * Creates a lineplot with the WSSSE obtained for different number of clusters
+   * @param wss_list list of wss calculated for each numnber of clusters
+   * @param clusters_range min - max number of cluster tested
+   * @param filename output filename
+   */
+  private def saveElbowLinePlot(wss_list: Seq[Double], clusters_range: Seq[Int], filename: String) = {
+    println("Save elbow lineplot...")
+    val data = clusters_range.zip(wss_list).map(pair => Point(pair._1, pair._2))
+
+    LinePlot.series(data, "WSSSE elbow", HSL(210, 100, 56))
+      .xAxis().yAxis().frame()
+      .xLabel("Number of cluster")
+      .yLabel("WSSSE")
+      .render()
+      .write(new File(filename))
+  }
+
+
+  /**
+   * Compute the elbow graph by calculating the WSSSE for each number of clusters
+   * @param start min number of clusters
+   * @param end max number of clusters
+   * @param input_data_points RDD[points]
+   * @param num_iteration maxim number of iteration for KMeans algorithm
+   * @param filename png file in which the result will be saved
+   */
+  private def computeElbow(start: Int, end: Int, input_data_points: RDD[org.apache.spark.mllib.linalg.Vector],
+                   num_iteration: Int, filename: String = "kmeans_elbow_plot.png"): Any = {
+
+    // (E) Elbow method to know the best number of clusters
+    val clusters_range = start to end
+    val wss_list = for{
+      num_centroids <- clusters_range
+      // compute kmeans
+      clusters = KMeans.train(input_data_points, num_centroids, num_iteration)
+      // compute the "error" measure
+      wss = clusters.computeCost(input_data_points)
+    } yield wss
+
+    saveElbowLinePlot(wss_list, clusters_range, filename)
+  }
+
+//  /**
+//   * Writes a given RDD into a CSV file.
+//   * @param rdd input data to be written
+//   * @param filePath  of the CSV file
+//   */
+//  private def writeRDDToCSV(rdd: RDD[(String, Int)], filePath: String): Unit = {
+//    val printWriter = new PrintWriter(new File(filePath))
+//
+//    // Write the data rows
+//    rdd.collect().foreach { case (strValue, _) =>
+//      val row = s"$strValue"
+//      printWriter.write(row + "\n")
+//    }
+//
+//    // Close the writer
+//    printWriter.close()
+//  }
+
+  private def fromRowToRddEntry(row: Row): (Double, Event) = {
+    (row(3).toString.toDouble, new Event((row(0).toString.toDouble, row(1).toString.toDouble),
+      row(2).toString.toDouble,
+      row(3).toString.toDouble,
+      row(4).toString.toInt))
   }
 
 
