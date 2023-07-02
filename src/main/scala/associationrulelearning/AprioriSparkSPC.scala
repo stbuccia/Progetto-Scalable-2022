@@ -1,19 +1,12 @@
 package associationrulelearning
 
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.storage.StorageLevel
 import org.apache.spark.rdd.RDD
 import scala.annotation.tailrec
+import com.fasterxml.jackson.module.scala.deser.overrides
 
-
-/**
- *
- * @param t
- * @param m
- * @param n
- *
- * todo: togliere abstract e implementare correttamente il trait
- */
-abstract class AprioriSparkSPC(t: List[Set[String]], m: Int, n: Double) extends AprioriSpark(t, m, n) {
+class AprioriSparkSPC(t: List[Set[String]], m: Int) extends AprioriSpark(t, m) {
 
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
@@ -23,7 +16,6 @@ abstract class AprioriSparkSPC(t: List[Set[String]], m: Int, n: Double) extends 
     else
       recursivePhase2(transactionsRdd, k + 1, setL.union(setL_k))
   }
-
 
   private def generateAssociationRules(frequentItemsets: RDD[(Set[String], Int)], minConfidence: Double): RDD[(Set[String], Set[String], Double)] = {
     val frequentItemsetsList = frequentItemsets.collect()
@@ -39,7 +31,6 @@ abstract class AprioriSparkSPC(t: List[Set[String]], m: Int, n: Double) extends 
     // Filter rules based on confidence
     associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence)
   }
-
 
   override def run() = {
     //TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)

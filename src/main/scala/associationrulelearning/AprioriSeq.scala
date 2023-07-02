@@ -1,5 +1,6 @@
 package associationrulelearning
 
+import model.Transaction
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
@@ -21,7 +22,9 @@ class AprioriSeq(dataFilePath: String, threshold: Double, confidence: Double, co
   val rdd: RDD[Set[String]] = context.textFile(dataFilePath)
       .map( x => x.split(",") )
       .map(_.toSet)
+
   override var transactions: Seq[Set[String]] = rdd.collect().toSeq
+  //override var transaction: Seq[Transaction]
 
   // Set minimum support and minimum confidence
   override var minSupport: Int = (threshold * transactions.length).toInt
