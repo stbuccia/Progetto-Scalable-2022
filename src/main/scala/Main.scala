@@ -1,6 +1,6 @@
 import associationrulelearning.runApriori.runAprioriSeq
 import clustering.EarthquakeKMeans.kMeansClustering
-import dataconversion.mainDataConversion.{RDDLabelConversion, labelConversion}
+import dataconversion.mainDataConversion.{labelConversion}
 import org.apache.spark.sql.SparkSession
 
 
@@ -40,6 +40,7 @@ object Main{
     sc.setLogLevel("WARN")
 
 
+
     // Load dataset
 
     val datasetDF = sparkSession.read
@@ -57,8 +58,6 @@ object Main{
     // Normalize data
 
     val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
-
-
 
     // Run algorithm for each cluster
 
