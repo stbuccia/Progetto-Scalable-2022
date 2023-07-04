@@ -49,15 +49,14 @@ object Main{
       .csv(datasetPath)
 
 
-    // Run clustering and update data with cluster info
 
+    // Run clustering and update data with cluster info
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
     val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, 5, 20, "clusteredDataMag")
 
 
     // Normalize data
-
-    val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
+    //val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
 
     // Run algorithm for each cluster
 
