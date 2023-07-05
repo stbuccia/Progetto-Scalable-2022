@@ -105,7 +105,9 @@ object EarthquakeKMeans {
     println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
     clusteredDataset.map(_._2)
 
-    /*
+
+
+/*
     // -------------------------------------------------------------------------------------------------------------
     // Questa parte commentata è servita solo a verificare che tutte le coppie (Double, Int) con chiave k1
     // avessero lo stesso valore v1 associato.
@@ -118,7 +120,7 @@ object EarthquakeKMeans {
     //discretizedDataByKey.foreach(x => println("reduceByKey " + x._1 + " " + x._2))
     //val magClusterMap = discretizedDataByKey.collectAsMap()
 
-    SCOMMENTA QUI SOTTO
+    // SCOMMENTA QUI SOTTO
     // Trasforma RDD in Map eliminando tutte le coppie (Double, Int) ripetute
     val magClusterMap = discretizedData.collectAsMap()
     val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
@@ -127,7 +129,7 @@ object EarthquakeKMeans {
     println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
     clusteredDataset
     // ------------------------------------------------------------------------------------------------------
-    */
+*/
 
 
 //    // Discretize the vector represented data using the K-means model

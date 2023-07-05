@@ -1,6 +1,7 @@
 package dataconversion
 
-import model.{Event, Transaction}
+
+import model.{Event, Hemisphere, Magnitude, Quadrant, Depth, Transaction}
 
 object mainDataConversion {
 
@@ -42,6 +43,48 @@ object mainDataConversion {
     new Transaction(line(0), line(1), line(2), line(3))
   }
 
+  /*
+  def labelConversionEnum(event: Event): Transaction = {
+
+    var mag = Magnitude.low
+    var depth = Depth.low
+    var quadrant = Quadrant.q1
+    var hemisphere = Hemisphere.north
+
+    if (event.location._1 >= 0) {
+      hemisphere = Hemisphere.north
+      if (event.location._2 >= 0)
+        quadrant = Quadrant.q1
+      else
+        quadrant = Quadrant.q2
+    }
+    else {
+      hemisphere = Hemisphere.south
+      if (event.location._2 >= 0)
+        quadrant = Quadrant.q4
+      else
+        quadrant = Quadrant.q3
+    }
+
+    //MAG   <5    5-6    >7
+    if (event.magnitude >= 6)
+      mag = Magnitude.high
+    else if (event.magnitude < 5)
+      mag = Magnitude.low
+    else
+      mag = Magnitude.med
+
+    //DEPTH   0 and 70    70 - 300    300 - 700
+    if (event.depth >= 300)
+      depth = Depth.high
+    else if (event.depth < 70)
+      depth = Depth.low
+    else
+      depth = Depth.med
+
+    new Transaction(hemisphere, quadrant, mag, depth)
+  }
+*/
 
   /*
     def main(args: Array[String]): Unit = {

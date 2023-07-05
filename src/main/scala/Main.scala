@@ -1,11 +1,13 @@
 import associationrulelearning.runApriori.runAprioriSeq
 import clustering.EarthquakeKMeans.kMeansClustering
-import dataconversion.mainDataConversion.{labelConversion}
+import dataconversion.mainDataConversion.labelConversion
 import org.apache.spark.sql.SparkSession
+import scala.io.StdIn.readLine
 
 
 object Main{
 
+  // Spark UI: http://localhost:4040/jobs/
 
   def main(args: Array[String]): Unit = {
 
@@ -56,7 +58,7 @@ object Main{
 
 
     // Normalize data
-    //val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
+    val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
 
     // Run algorithm for each cluster
 
@@ -67,6 +69,9 @@ object Main{
 //        .toList
 //        .foreach(file => runAprioriSeq(sc, file.getPath))
 
+
+    println("\nMain method complete. Press Enter.")
+    readLine()
 
   }
 
