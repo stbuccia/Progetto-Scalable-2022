@@ -1,0 +1,4 @@
+2023.06.19 22:37:04 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/stefano/IdeaProjects/Progetto-Scalable-2022/src/main/.metals/lsp.trace.json or /home/stefano/.cache/metals/lsp.trace.json[0m
+2023.06.19 22:37:04 INFO  logging to file /home/stefano/IdeaProjects/Progetto-Scalable-2022/.metals/metals.log[0m
+2023.06.19 22:38:22 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/stefano/IdeaProjects/Progetto-Scalable-2022/src/main/.metals/lsp.trace.json or /home/stefano/.cache/metals/lsp.trace.json[0m
+2023.06.19 22:38:22 INFO  logging to file /home/stefano/IdeaProjects/Progetto-Scalable-2022/.metals/metals.log[0m

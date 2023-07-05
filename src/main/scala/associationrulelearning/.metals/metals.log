@@ -1,0 +1,2 @@
+2023.07.03 23:08:04 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/stefano/IdeaProjects/Progetto-Scalable-2022/src/main/scala/associationrulelearning/.metals/lsp.trace.json or /home/stefano/.cache/metals/lsp.trace.json[0m
+2023.07.03 23:08:05 INFO  logging to file /home/stefano/IdeaProjects/Progetto-Scalable-2022/.metals/metals.log[0m
