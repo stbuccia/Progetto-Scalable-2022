@@ -97,28 +97,18 @@ object EarthquakeKMeans {
       (value, clusterIndex)
     })
 
-    // Build and return the dataset together with cluster information
-    val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
+    //// Build and return the dataset together with cluster information
+    //val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
+        //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
 
-    clusteredDataset.map(_._2)
+    //clusteredDataset.map(_._2)
 
-//    // Discretize the vector represented data using the K-means model
-//    val discretizedData2 = parsedData.map(row => {
-//      val value = row(column).toDouble
-//      val vector = Vectors.dense(value)
-//      val clusterIndex = clusters.predict(vector)
-//      (row.mkString(","), clusterIndex)
-//    })//.map { case (fields, clusterIndex) => (fields.mkString(","), clusterIndex) }
-
-
-//    // Write each cluster's data to separate files
-//    for (clusterIndex <- 0 until numClusters) {
-//      val clusterData = discretizedData2.filter { case (_, c) => c == clusterIndex }
-//      //clusterData.saveAsTextFile(s"${modelName}_cluster$clusterIndex")
-//      var filePath = "src/main/resources/dataset_2010_2021_cluster" + clusterIndex + ".csv"
-//      writeRDDToCSV(clusterData, filePath);
-//      dataconversion.mainDataConversion.normalizeDataset(sc, filePath)
-//    }
+    val magClusterMap = discretizedData.collectAsMap()
+    val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
+    println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
+    clusteredDataset
 
   }
 

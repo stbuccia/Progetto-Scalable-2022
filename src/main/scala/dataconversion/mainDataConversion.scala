@@ -46,7 +46,7 @@ object mainDataConversion {
     transactions.map(dataConversion).map(toTupleLineLabel)
   }
 
-  def labelConversion(event: Event): Transaction = {
+  def labelConversion(event: Event): Set[String] = {
     fromTupleToTransaction(fromEventToTuple(event))
   }
 
@@ -90,7 +90,7 @@ object mainDataConversion {
 
   }
 
-  private def fromTupleToTransaction(tuple: Tuple12[Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int]): Transaction = {
+  private def fromTupleToTransaction(tuple: Tuple12[Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int]): Set[String] = {
     var line = new Array[String](0)
     val labelArray: Array[String] = Array("SH", "NH", "Q1", "Q2", "Q3", "Q4", "LOW_MAG", "MED_MAG", "HIGH_MAG", "LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
     val lineArray: Array[Int] = tuple.productIterator.toArray.map(_.toString.toInt)
@@ -101,7 +101,8 @@ object mainDataConversion {
       }
       i = i + 1
     }
-    new Transaction(line(0), line(1), line(2), line(3))
+    //new Transaction(line(0), line(1), line(2), line(3))
+     Set(line(0), line(1), line(2), line(3))
   }
 
 
