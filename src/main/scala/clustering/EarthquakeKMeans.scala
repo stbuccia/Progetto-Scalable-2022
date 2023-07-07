@@ -90,25 +90,36 @@ object EarthquakeKMeans {
       println(s"Cluster $clusterIndex size: $size")
     }
 
-    // Discretize the extracted column using the trained K-means model
-    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
-      val vector = Vectors.dense(value)
-      val clusterIndex = clusters.predict(vector)
-      (value, clusterIndex)
-    })
+    //// Discretize the extracted column using the trained K-means model
+    //val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
+      //val vector = Vectors.dense(value)
+      //val clusterIndex = clusters.predict(vector)
+      //(value, clusterIndex)
+    //})
+
+    val discretizedData = datasetRDD.map({ case (value, event) => {
+        val vector = Vectors.dense(value)
+        val clusterIndex = clusters.predict(vector)
+        (clusterIndex, event)
+        }
+      })
+    
+    discretizedData
 
     //// Build and return the dataset together with cluster information
+    //Guarda il discretizedData[(Double, Int) e lo confronta con il datasetIniziale RDD[(Double, Event)], in modo 
+    //Bisognerebbe usare una reduceByKey?
     //val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
         //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
     //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
 
     //clusteredDataset.map(_._2)
 
-    val magClusterMap = discretizedData.collectAsMap()
-    val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
-    println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
-    println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
-    clusteredDataset
+    //val magClusterMap = discretizedData.collectAsMap()
+    //val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
+    //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
+    //clusteredDataset
 
   }
 
