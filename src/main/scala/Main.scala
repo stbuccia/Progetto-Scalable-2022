@@ -59,11 +59,11 @@ object Main{
       println(s"Computing cluster $clusterIndex...")
       val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
 
-      val alg = new AprioriSparkSPC(transactions, 0.6, 0.7)
-      alg.run()
-
-      //val alg = new FPGrowthAssociation(transactions, 0.6, 0.7)
+      //val alg = new AprioriSparkSPC(transactions, 0.6, 0.7)
       //alg.run()
+
+      val alg = new FPGrowth(transactions, 0.6, 0.7)
+      alg.run()
     }
 
   }
