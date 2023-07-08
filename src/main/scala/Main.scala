@@ -48,7 +48,7 @@ object Main{
 
     // Run clustering and update data with cluster info
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
-    val numClusters = 1
+    val numClusters = 5
     val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag")
 
     // Normalize data
