@@ -1,54 +1,139 @@
 package dataconversion
 
-import model.{Event, Transaction}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
 
-import java.io.{File, PrintWriter}
+import model.{Event, Hemisphere, Magnitude, Quadrant, Depth, Transaction}
 
 object mainDataConversion {
 
+  //def labelConversion(event: Event): Transaction = {
+  def labelConversion(event: Event): Set[String] = {
+ 
+    //fromTupleToTransaction(fromEventToTuple(event))
+    val line = new Array[String](4)
 
-  def main(args: Array[String]): Unit = {
+    if (event.location._1 >= 0) {
+      line(0) = "NH"
+      if (event.location._2 >= 0)
+        line(1) = "Q1"
+      else
+        line(1) = "Q2"
+    }
+    else {
+      line(0) = "SH"
+      if (event.location._2 >= 0)
+        line(1) = "Q4"
+      else
+        line(1) = "Q3"
+    }
 
-    val appName = "EarthquakeDataConversion"
-    val master = "local" // or "local[2]"
-    val conf = new SparkConf()
-      .setAppName(appName)
-      .setMaster(master)
-    val sc = new SparkContext(conf)
+    //MAG   <5    5-6    >7
+    if (event.magnitude >= 6)
+      line(2) = "HIGH_MAG"
+    else if (event.magnitude < 5)
+      line(2) = "LOW_MAG"
+    else
+      line(2) = "MED_MAG"
 
-    val inputFilePath = "src/main/resources/dataset_from_2010_01_to_2021_12_cluster1.csv"
-
-    println("Read CSV file...")
-    var rdd = readCSV(sc, inputFilePath)
-
-    println("Check missing values...")
-    rdd = handlerMissingValues(rdd)
-
-    //val startYear = rdd.map(_._5.toInt).min()
-    //val endYear = rdd.map(_._5.toInt).max()
-
-    //println("Data conversion...")
-    //val rdd_output = rdd.map(x => dataConversion(x))
-
-    RDDLabelConversion(rdd).collect().foreach(println)
-    //println("Write CSV file with binary data...")
-    //saveAsCSVFile(rdd_output, startYear, endYear, false)
-
-    //println("Write CSV file with text data...")
-    //saveAsCSVFile(rdd_output, startYear, endYear, true)
+    //DEPTH   0 and 70    70 - 300    300 - 700
+    if (event.depth >= 300)
+      line(3) = "HIGH_DEPTH"
+    else if (event.depth < 70)
+      line(3) = "LOW_DEPTH"
+    else
+      line(3) = "MED_DEPTH"
 
 
+    //new Transaction(line(0), line(1), line(2), line(3))
+    Set(line(0), line(1), line(2), line(3))
   }
+
+  /*
+  def labelConversionEnum(event: Event): Transaction = {
+
+    var mag = Magnitude.low
+    var depth = Depth.low
+    var quadrant = Quadrant.q1
+    var hemisphere = Hemisphere.north
+
+    if (event.location._1 >= 0) {
+      hemisphere = Hemisphere.north
+      if (event.location._2 >= 0)
+        quadrant = Quadrant.q1
+      else
+        quadrant = Quadrant.q2
+    }
+    else {
+      hemisphere = Hemisphere.south
+      if (event.location._2 >= 0)
+        quadrant = Quadrant.q4
+      else
+        quadrant = Quadrant.q3
+    }
+
+    //MAG   <5    5-6    >7
+    if (event.magnitude >= 6)
+      mag = Magnitude.high
+    else if (event.magnitude < 5)
+      mag = Magnitude.low
+    else
+      mag = Magnitude.med
+
+    //DEPTH   0 and 70    70 - 300    300 - 700
+    if (event.depth >= 300)
+      depth = Depth.high
+    else if (event.depth < 70)
+      depth = Depth.low
+    else
+      depth = Depth.med
+
+    new Transaction(hemisphere, quadrant, mag, depth)
+  }
+*/
+
+  /*
+    def main(args: Array[String]): Unit = {
+
+      val appName = "EarthquakeDataConversion"
+      val master = "local" // or "local[2]"
+      val conf = new SparkConf()
+        .setAppName(appName)
+        .setMaster(master)
+      val sc = new SparkContext(conf)
+
+      val inputFilePath = "src/main/resources/dataset_from_2010_01_to_2021_12_cluster1.csv"
+
+      println("Read CSV file...")
+      var rdd = readCSV(sc, inputFilePath)
+
+      println("Check missing values...")
+      rdd = handlerMissingValues(rdd)
+
+      //val startYear = rdd.map(_._5.toInt).min()
+      //val endYear = rdd.map(_._5.toInt).max()
+
+      //println("Data conversion...")
+      //val rdd_output = rdd.map(x => dataConversion(x))
+
+      RDDLabelConversion(rdd).collect().foreach(println)
+      //println("Write CSV file with binary data...")
+      //saveAsCSVFile(rdd_output, startYear, endYear, false)
+
+      //println("Write CSV file with text data...")
+      //saveAsCSVFile(rdd_output, startYear, endYear, true)
+
+
+    }
 
   def RDDLabelConversion(transactions: RDD[(String,String,String,String,String)]) : RDD[(String, String, String, String)] = {
     transactions.map(dataConversion).map(toTupleLineLabel)
   }
 
+<<<<<<< HEAD
   def labelConversion(event: Event): Set[String] = {
     fromTupleToTransaction(fromEventToTuple(event))
   }
+=======
+>>>>>>> 6c30a32f49cf9ab922c69ac8bace5bd0dd12be74
 
   private def fromEventToTuple(x: Event): Tuple12[Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int,Int] = {
     val myArray = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -158,7 +243,6 @@ object mainDataConversion {
     return rdd
   }
 
-
   def toCSVLineBinary(x: Tuple12[Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int]): String = {
     x.productIterator.mkString(",")
   }
@@ -218,8 +302,6 @@ object mainDataConversion {
     println("   - Write " +rdd.count() + " lines")
   }
 
-
-  /*
     def saveAsCSVFileLabel(rdd: RDD[(Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int)],
                            startYear: Int,
                            endYear: Int
@@ -232,7 +314,10 @@ object mainDataConversion {
       })
       pwCSV.close()
     }
-  */
+
+
+
+
   def countWrongValues(rdd: RDD[(String,String,String,String,String )], threshold: Double): Unit = {
 
     val rddWrongValues = rdd.zipWithIndex().filter(_._1._4.toDouble < threshold)
@@ -258,4 +343,11 @@ object mainDataConversion {
     return rdd
   }
 
+<<<<<<< HEAD
 }
+=======
+
+   */
+
+}
+
