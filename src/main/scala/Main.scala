@@ -1,6 +1,7 @@
 import associationrulelearning.runApriori.runAprioriSeq
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.{RDDLabelConversion, labelConversion}
+import org.apache.spark.rdd
 import org.apache.spark.sql.SparkSession
 
 
@@ -62,12 +63,20 @@ object Main{
 
     // Run algorithm for each cluster
 
+    normalizedData.groupByKey().foreach(transactionGroup => sc.parallelize(transactionGroup._2.toSet))
+
+    rdd.flatMap{case(key, list) => list.map(item => ((key,item._1), item._2))}
+   .reduceByKey(_+_)
+   .map{case((key,name),hours) => (key, List((name, hours)))}
+   .reduceByKey(_++_)
+
+
 //    val folder = new File("src/main/resources/")
 //    if (folder.exists && folder.isDirectory)
 //      folder.listFiles
 //        .filter(file => file.toString.contains("label"))
 //        .toList
-//        .foreach(file => runAprioriSeq(sc, file.getPath))
+//        .foreach(file => runAprioriSeq(sc, normalizedData))
 
 
   }

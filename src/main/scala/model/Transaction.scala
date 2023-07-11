@@ -8,4 +8,8 @@ class Transaction(val hemisphere: String,
   override def toString: String = {
     " "+ hemisphere + ", " + quadrant + ", " + magnitude + ", " + depth
   }
+
+  def toSet(): Set[String] = {
+    Set(hemisphere, quadrant, magnitude, depth)
+  }
 }

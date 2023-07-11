@@ -4,9 +4,6 @@ import model.Transaction
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
-import java.io.File
-import scala.io.Source
-import scala.util.control.Breaks
 import scala.util.control.Breaks.{break, breakable}
 
 /**
@@ -16,14 +13,14 @@ import scala.util.control.Breaks.{break, breakable}
  * todo: capire perché per usare il trait dobbiamo anche estendere qualcosa...
  * todo: siccome la lettura dal file viene fatta in modo ridondante sia qua che nel Kmeans, creare una classe di utility col metodo
  */
-class AprioriSeq(dataFilePath: String, threshold: Double, confidence: Double, context: SparkContext) extends Serializable with Apriori {
+class AprioriSeq(context: SparkContext, dataset: RDD[(Int, Transaction)], threshold: Double, confidence: Double) extends Serializable with Apriori {
 
-  // Set up transactions list from Input File
-  val rdd: RDD[Set[String]] = context.textFile(dataFilePath)
-      .map( x => x.split(",") )
-      .map(_.toSet)
+//  // Set up transactions list from Input File
+//  val rdd: RDD[Set[String]] = context.textFile(dataFilePath)
+//      .map( x => x.split(",") )
+//      .map(_.toSet)
 
-  override var transactions: Seq[Set[String]] = rdd.collect().toSeq
+  override var transactions: Seq[Transaction] = dataset.map(_._2).collect().toSeq
   //override var transaction: Seq[Transaction]
 
   // Set minimum support and minimum confidence
@@ -47,7 +44,7 @@ class AprioriSeq(dataFilePath: String, threshold: Double, confidence: Double, co
    * @return  number of times the given itemset appears
    */
   def getSupport(itemset : Set[String]) : Int = {
-    transactions.count(transaction => itemset.subsetOf(transaction))
+    transactions.count(transaction => itemset.subsetOf(transaction.toSet()))
     // count.toDouble / transactions.size.toDouble
   }
 
@@ -58,7 +55,7 @@ class AprioriSeq(dataFilePath: String, threshold: Double, confidence: Double, co
    * @return  subset of candidatesSet where only the ones whose subsets satisfy the minimum support are left
    */
   private def prune(candidatesSet: Set[(Set[String],Int)]): Set[(Set[String],Int)] = {
-    candidatesSet.filter(pair => transactions.count(pair._1.subsetOf(_)) >= minSupport)
+    candidatesSet.filter(pair => transactions.count(transaction => pair._1.subsetOf(transaction.toSet())) >= minSupport)
   }
 
   private def generateAssociationRules(): Unit = {
