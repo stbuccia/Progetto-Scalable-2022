@@ -28,7 +28,9 @@ object runApriori {
     println("===Frequent Itemsets===")
     alg.frequentItemsets.foreach(println)
     println("===Association Rules===")
-    alg.associationRules.foreach(println)
+    alg.associationRules.foreach{case(lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
 
   }
 

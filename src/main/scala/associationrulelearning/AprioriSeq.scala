@@ -73,7 +73,7 @@ class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Do
     var k = 2
     breakable {
       while (true) {
-        println("Searching for " + k + " dimensional frequent itemsets. Min support is " + minSupport)
+        println("Searching for " + k + " dimensional frequent itemsets")
 
         // Creating a set of all the possible subsets of dimension k
         val joinSet = itemSet.subsets().filter(_.size == k).toSet
@@ -81,8 +81,6 @@ class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Do
         // Deleting itemsets which do not satisfy minimum support
         var candidatesSet = joinSet.map(itemset => (itemset, getSupport(itemset)))
           .filter(pair => pair._2 >= minSupport)
-
-        println("Candidate set is: " + candidatesSet)
 
         // Deleting itemsets whose subsets do not satisfy minimum support
         candidatesSet = prune(candidatesSet)
