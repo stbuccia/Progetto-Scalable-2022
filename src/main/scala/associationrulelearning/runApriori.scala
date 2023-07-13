@@ -16,7 +16,7 @@ import java.io.File
  */
 object runApriori {
 
-  def runAprioriSeq(sc: SparkContext, dataset: RDD[(Transaction)]) : Unit = {
+  def runAprioriSeq(sc: SparkContext, dataset: RDD[Set[String]]) : Unit = {
 
     // Creates an algorithm instance
     val alg = new AprioriSeq(sc, dataset, 0.6, 0.7)

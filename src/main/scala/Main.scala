@@ -1,7 +1,7 @@
 import associationrulelearning.runApriori.runAprioriSeq
 import clustering.EarthquakeKMeans.kMeansClustering
-import dataconversion.mainDataConversion.{RDDLabelConversion, labelConversion}
-import org.apache.spark.rdd
+import dataconversion.mainDataConversion.labelConversion
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 
 
@@ -52,33 +52,26 @@ object Main{
     // Run clustering and update data with cluster info
 
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
-    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, 5, 20, "clusteredDataMag")
+    val numClusters = 5
+    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", false)
 
 
     // Normalize data
 
-    val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
-
+    val normalizedData: RDD[(Int, Set[String])] = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
 
 
     // Run algorithm for each cluster
 
-    normalizedData.groupByKey().foreach(transactionGroup => sc.parallelize(transactionGroup._2.toSet))
-
-    rdd.flatMap{case(key, list) => list.map(item => ((key,item._1), item._2))}
-   .reduceByKey(_+_)
-   .map{case((key,name),hours) => (key, List((name, hours)))}
-   .reduceByKey(_++_)
-
-
-//    val folder = new File("src/main/resources/")
-//    if (folder.exists && folder.isDirectory)
-//      folder.listFiles
-//        .filter(file => file.toString.contains("label"))
-//        .toList
-//        .foreach(file => runAprioriSeq(sc, normalizedData))
+    for (clusterIndex <- 0 until numClusters) {
+      println()
+      println(s"Computing cluster $clusterIndex...")
+      val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
+      runAprioriSeq(sc, transactions)
+    }
 
 
+    sparkSession.stop()
   }
 
 }

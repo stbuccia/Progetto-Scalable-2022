@@ -13,14 +13,14 @@ import scala.util.control.Breaks.{break, breakable}
  * todo: capire perché per usare il trait dobbiamo anche estendere qualcosa...
  * todo: siccome la lettura dal file viene fatta in modo ridondante sia qua che nel Kmeans, creare una classe di utility col metodo
  */
-class AprioriSeq(context: SparkContext, dataset: RDD[(Int, Transaction)], threshold: Double, confidence: Double) extends Serializable with Apriori {
+class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Double, confidence: Double) extends Serializable with Apriori {
 
 //  // Set up transactions list from Input File
 //  val rdd: RDD[Set[String]] = context.textFile(dataFilePath)
 //      .map( x => x.split(",") )
 //      .map(_.toSet)
 
-  override var transactions: Seq[Transaction] = dataset.map(_._2).collect().toSeq
+  override var transactions: Seq[Set[String]] = dataset.collect().toSeq
   //override var transaction: Seq[Transaction]
 
   // Set minimum support and minimum confidence
@@ -44,7 +44,7 @@ class AprioriSeq(context: SparkContext, dataset: RDD[(Int, Transaction)], thresh
    * @return  number of times the given itemset appears
    */
   def getSupport(itemset : Set[String]) : Int = {
-    transactions.count(transaction => itemset.subsetOf(transaction.toSet()))
+    transactions.count(transaction => itemset.subsetOf(transaction))
     // count.toDouble / transactions.size.toDouble
   }
 
@@ -55,7 +55,7 @@ class AprioriSeq(context: SparkContext, dataset: RDD[(Int, Transaction)], thresh
    * @return  subset of candidatesSet where only the ones whose subsets satisfy the minimum support are left
    */
   private def prune(candidatesSet: Set[(Set[String],Int)]): Set[(Set[String],Int)] = {
-    candidatesSet.filter(pair => transactions.count(transaction => pair._1.subsetOf(transaction.toSet())) >= minSupport)
+    candidatesSet.filter(pair => transactions.count(transaction => pair._1.subsetOf(transaction)) >= minSupport)
   }
 
   private def generateAssociationRules(): Unit = {
@@ -73,7 +73,7 @@ class AprioriSeq(context: SparkContext, dataset: RDD[(Int, Transaction)], thresh
     var k = 2
     breakable {
       while (true) {
-        println("Searching for " + k + " dimensional frequent itemsets")
+        println("Searching for " + k + " dimensional frequent itemsets. Min support is " + minSupport)
 
         // Creating a set of all the possible subsets of dimension k
         val joinSet = itemSet.subsets().filter(_.size == k).toSet
@@ -81,6 +81,8 @@ class AprioriSeq(context: SparkContext, dataset: RDD[(Int, Transaction)], thresh
         // Deleting itemsets which do not satisfy minimum support
         var candidatesSet = joinSet.map(itemset => (itemset, getSupport(itemset)))
           .filter(pair => pair._2 >= minSupport)
+
+        println("Candidate set is: " + candidatesSet)
 
         // Deleting itemsets whose subsets do not satisfy minimum support
         candidatesSet = prune(candidatesSet)
