@@ -2,6 +2,8 @@
 .bsp
 .idea
 .idea/*
+.metals
+.metals/*
 project
 project/*
 src/project

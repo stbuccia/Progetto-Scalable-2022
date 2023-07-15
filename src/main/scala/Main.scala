@@ -1,11 +1,12 @@
 //import associationrulelearning.runApriori.runAprioriSeq
 import associationrulelearning.AprioriSparkSPC
+import associationrulelearning.FPGrowth
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.{RDDLabelConversion, labelConversion}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
 
-object Main{
+object Main {
 
   def main(args: Array[String]): Unit = {
 
