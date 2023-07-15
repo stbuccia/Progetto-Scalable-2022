@@ -5,6 +5,7 @@ import model.{Event, Hemisphere, Magnitude, Quadrant, Depth, Transaction}
 
 object mainDataConversion {
 
+<<<<<<< HEAD
   //def labelConversion(event: Event): Transaction = {
   def labelConversion(event: Event): Set[String] = {
  
@@ -142,34 +143,44 @@ object mainDataConversion {
       myArray(1) = 1
       if(x.location._2 >= 0)
         myArray(2) = 1
+=======
+  def labelConversion(event: Event): Set[String] = {
+
+    val line = new Array[String](4)
+
+    if (event.location._1 >= 0) {
+      line(0) = "NH"
+      if (event.location._2 >= 0)
+        line(1) = "Q1"
+>>>>>>> melania
       else
-        myArray(3) = 1
+        line(1) = "Q2"
     }
     else {
-      myArray(0) = 1
-      if (x.location._2 >= 0)
-        myArray(5) = 1
+      line(0) = "SH"
+      if (event.location._2 >= 0)
+        line(1) = "Q4"
       else
-        myArray(4) = 1
+        line(1) = "Q3"
     }
 
     //MAG   <5    5-6    >7
-    if (x.magnitude >= 6)
-      myArray(8) = 1
-    else if (x.magnitude < 5)
-      myArray(6) = 1
+    if (event.magnitude >= 6)
+      line(2) = "HIGH_MAG"
+    else if (event.magnitude < 5)
+      line(2) = "LOW_MAG"
     else
-      myArray(7) = 1
+      line(2) = "MED_MAG"
 
     //DEPTH   0 and 70    70 - 300    300 - 700
-    if(x.depth >= 300)
-      myArray(11) = 1
+    if (event.depth >= 300)
+      line(3) = "HIGH_DEPTH"
+    else if (event.depth < 70)
+      line(3) = "LOW_DEPTH"
     else
-      if(x.depth < 70)
-        myArray(9) = 1
-      else
-        myArray(10) = 1
+      line(3) = "MED_DEPTH"
 
+<<<<<<< HEAD
     (myArray(0), myArray(1), myArray(2), myArray(3), myArray(4), myArray(5),
       myArray(6), myArray(7), myArray(8), myArray(9), myArray(10), myArray(11))
 
@@ -341,6 +352,11 @@ object mainDataConversion {
       return rdd_without_missing_values
     }
     return rdd
+=======
+
+    //new Transaction(line(0), line(1), line(2), line(3))
+    Set(line(0), line(1), line(2), line(3))
+>>>>>>> melania
   }
 
 <<<<<<< HEAD

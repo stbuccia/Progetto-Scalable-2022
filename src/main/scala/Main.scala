@@ -1,7 +1,8 @@
-//import associationrulelearning.runApriori.runAprioriSeq
+import associationrulelearning.runApriori.runAprioriSeq
 import associationrulelearning.AprioriSparkSPC
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
+
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
 import scala.io.StdIn.readLine
@@ -43,7 +44,6 @@ object Main{
     sc.setLogLevel("WARN")
 
 
-
     // Load dataset
 
     val datasetDF = sparkSession.read
@@ -54,33 +54,30 @@ object Main{
     // Run clustering and update data with cluster info
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
     val numClusters = 5
-    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag")
+    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", false)
 
     // Normalize data
-    //val normalizedData = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
     val normalizedData: RDD[(Int, Set[String])]= clusteredData.map(entry => (entry._1,labelConversion(entry._2)))
 
+    // Run algorithm for each cluster
     for (clusterIndex <- 0 until numClusters) {
       println()
       println(s"Computing cluster $clusterIndex...")
       val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
 
+      // Run Single Pass Count Apriori
       val alg = new AprioriSparkSPC(transactions, 0.6, 0.7)
       alg.run()
 
-      //val alg = new FPGrowth(transactions, 0.6, 0.7)
-      //alg.run()
+//      // Run FPGrowth algorithm
+//      val alg = new FPGrowth(transactions, 0.6, 0.7)
+//      alg.run()
+
+//      // Run sequential naive algorithm
+//      runAprioriSeq(sc, transactions)
     }
 
-    // Run algorithm for each cluster
-
-//    val folder = new File("src/main/resources/")
-//    if (folder.exists && folder.isDirectory)
-//      folder.listFiles
-//        .filter(file => file.toString.contains("label"))
-//        .toList
-//        .foreach(file => runAprioriSeq(sc, file.getPath))
-
+    sparkSession.stop()
 
     println("\nMain method complete. Press Enter.")
     readLine()

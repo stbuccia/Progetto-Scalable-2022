@@ -39,17 +39,9 @@ object EarthquakeKMeans {
    * @param modelName name of the returned model
    * @return an RDD containing every data associated with its cluster, in the form (Value, Cluster_Index)
    */
-  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, dimension: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData"): RDD[(Int, Event)] = {
+  def kMeansClustering(sc: SparkContext, datasetDF: DataFrame, dimension: Int, numClusters: Int, numIterations: Int, modelName: String = "kMeansClusteredData", computeElbowMode: Boolean): RDD[(Int, Event)] = {
 
     // Loading dataset
-
-//    val src = getResourceFile(dataFilePath).filter(_.nonEmpty).drop(1).toList
-//    val textData = sc.parallelize(src)
-//    val parsedData = textData
-//      .map(_.split(","))
-//      .cache()
-
-//    val columnData: RDD[Double] = parsedData.map(fields => fields(column).toDouble)
 
     val datasetRDD = datasetDF.rdd.map(fromRowToRddEntry)
 
@@ -61,12 +53,12 @@ object EarthquakeKMeans {
     // Cluster the data using KMeans
     val clusters = KMeans.train(vectors, numClusters, numIterations) // returns a KMeansModel obj
 
-
-    println("Computing elbow method...")
+    if (computeElbowMode) {
+      println("Computing elbow method...")
 
     // Elbow method computation
     computeElbow(2, 10, vectors, numIterations, modelName + "ElbowPlot.png")
-
+    }
 
     println("Results:")
 
@@ -91,6 +83,7 @@ object EarthquakeKMeans {
       println(s"Cluster $clusterIndex size: $size")
     }
 
+<<<<<<< HEAD
     //// Discretize the extracted column using the trained K-means model
     //val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
       //val vector = Vectors.dense(value)
@@ -148,20 +141,38 @@ object EarthquakeKMeans {
     // ------------------------------------------------------------------------------------------------------
 */
 
+=======
+>>>>>>> melania
 
-//    // Discretize the vector represented data using the K-means model
-//    val discretizedData2 = parsedData.map(row => {
-//      val value = row(column).toDouble
+//    // Discretize the extracted column using the trained K-means model
+//    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
 //      val vector = Vectors.dense(value)
 //      val clusterIndex = clusters.predict(vector)
-//      (row.mkString(","), clusterIndex)
-//    })//.map { case (fields, clusterIndex) => (fields.mkString(","), clusterIndex) }
+//      (value, clusterIndex)
+//    })
 
+<<<<<<< HEAD
     //val magClusterMap = discretizedData.collectAsMap()
     //val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
     //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
     //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
     //clusteredDataset
+=======
+    // Build and return the dataset together with cluster information
+//    val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
+//
+//    clusteredDataset.map(_._2)
+
+    // Build and return the dataset together with cluster information
+    val discretizedData = datasetRDD.map({ case (value, event) => {
+        val vector = Vectors.dense(value)
+        val clusterIndex = clusters.predict(vector)
+        (clusterIndex, event)
+        }
+      })
+
+    discretizedData
+>>>>>>> melania
 
   }
 
