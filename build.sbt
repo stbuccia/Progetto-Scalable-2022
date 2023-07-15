@@ -2,15 +2,15 @@ import sbt.project
 
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / scalaVersion := "2.12.14"
 
 lazy val root = (project in file("."))
   .settings(
     name := "apriori-association-rule-mining-earthquake-prediction",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-core" % "3.2.1",
-      "org.apache.spark" %% "spark-sql" % "3.2.1",
-      "org.apache.spark" %% "spark-mllib" % "3.2.1"
+      "org.apache.spark" %% "spark-core" % "3.2.1" % "provided",
+      "org.apache.spark" %% "spark-sql" % "3.2.1" % "provided",
+      "org.apache.spark" %% "spark-mllib" % "3.2.1" % "provided"
     ),
     assembly / assemblyJarName := "apriori-arm.jar",
     assembly / assemblyMergeStrategy := {
