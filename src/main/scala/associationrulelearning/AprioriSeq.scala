@@ -1,41 +1,26 @@
 package associationrulelearning
 
-import model.Transaction
-import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-
 import scala.util.control.Breaks.{break, breakable}
 
 /**
  * Class for sequential version of Apriori algorithm
- * @param dataFilePath path of the file that contains Data - i.e. list of itemset, transactions
  *
- * todo: capire perché per usare il trait dobbiamo anche estendere qualcosa...
- * todo: siccome la lettura dal file viene fatta in modo ridondante sia qua che nel Kmeans, creare una classe di utility col metodo
  */
-class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Double, confidence: Double) extends Serializable with Apriori {
-
-//  // Set up transactions list from Input File
-//  val rdd: RDD[Set[String]] = context.textFile(dataFilePath)
-//      .map( x => x.split(",") )
-//      .map(_.toSet)
+class AprioriSeq(dataset: RDD[Set[String]], threshold: Double, confidence: Double) extends Serializable with Apriori {
 
   override var transactions: Seq[Set[String]] = dataset.collect().toSeq
-  //override var transaction: Seq[Transaction]
 
   // Set minimum support and minimum confidence
   override var minSupport: Int = (threshold * transactions.length).toInt
   override var minConfidence: Double = confidence
 
   // Define global vars
-  var generatedItemsets : Map[Set[String], Int] = Map()
-  var singletonSet: Set[Set[String]] = itemSet.subsets().filter(_.size == 1).toSet
-  for(singleton<-singletonSet) {
-    generatedItemsets += (singleton->getSupport(singleton))
-  }
-
   var frequentItemsets: Set[Set[String]] = Set()
   var associationRules : List[(Set[String], Set[String], Double)] = List()
+
+  // Create local variable in order to save support values
+  var generatedItemsets : Map[Set[String], Int] = Map()
 
 
   /**
@@ -45,7 +30,6 @@ class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Do
    */
   def getSupport(itemset : Set[String]) : Int = {
     transactions.count(transaction => itemset.subsetOf(transaction))
-    // count.toDouble / transactions.size.toDouble
   }
 
 
@@ -58,6 +42,10 @@ class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Do
     candidatesSet.filter(pair => transactions.count(transaction => pair._1.subsetOf(transaction)) >= minSupport)
   }
 
+
+  /**
+   * Generates Association Rules from Frequent Itemsets. Every rule must have at least minConfidence confidence value.
+   */
   private def generateAssociationRules(): Unit = {
     frequentItemsets.foreach(itemset =>
       itemset.subsets.filter(subset => (subset.nonEmpty & subset.size < itemset.size))
@@ -67,7 +55,15 @@ class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Do
     associationRules = associationRules.filter( rule => rule._3>=minConfidence)
   }
 
+
   def run(): Unit = {
+
+    // Initialize 1 dimensional frequent itemsets
+    val singletonSet: Set[Set[String]] = itemSet.subsets().filter(_.size == 1).toSet
+    singletonSet.foreach(singleton => {
+      val singletonSupport = getSupport(singleton)
+      if (singletonSupport >= minSupport) generatedItemsets += (singleton->singletonSupport)})
+
 
     // Find frequent itemsets
     var k = 2
@@ -97,7 +93,7 @@ class AprioriSeq(context: SparkContext, dataset: RDD[Set[String]], threshold: Do
     }
 
     // Save frequent itemsets
-    frequentItemsets = generatedItemsets.keySet.filter(itemset => itemset.size == k-1)
+    frequentItemsets = generatedItemsets.keySet
 
     // Generate association rules
     generateAssociationRules()
