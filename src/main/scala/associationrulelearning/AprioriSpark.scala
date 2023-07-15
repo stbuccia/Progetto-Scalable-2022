@@ -10,7 +10,7 @@ import org.apache.spark.rdd.RDD
  *
  * todo: togliere abstract e implementare correttamente il trait
  */
-abstract class AprioriSpark(t: RDD[Set[String]], m: Double, n: Double) extends java.io.Serializable with Apriori {
+abstract class AprioriSpark(t: RDD[Set[String]], m: Double, n: Double) extends java.io.Serializable with Apriori[RDD[Set[String]]] {
 
   var transactions: RDD[Set[String]] = t
   var minSupport: Int = (m * transactions.count()).toInt

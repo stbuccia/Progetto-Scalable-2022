@@ -1,10 +1,8 @@
 package associationrulelearning
 
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.rdd.RDD
 import scala.annotation.tailrec
-import com.fasterxml.jackson.module.scala.deser.overrides
+
 
 class AprioriSparkSPC(t: RDD[Set[String]], m: Double, n: Double) extends AprioriSpark(t, m, n) {
 

@@ -1,10 +1,6 @@
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SparkSession, DataFrame}
-import org.apache.spark.mllib.fpm.FPGrowth
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
+package associationrulelearning
 
-import scala.io.Source
+import org.apache.spark.rdd.RDD
 
 
 class FPGrowth( t: RDD[Set[String]], m: Double, n: Double) {
@@ -14,7 +10,7 @@ class FPGrowth( t: RDD[Set[String]], m: Double, n: Double) {
     var minConfidence: Double = n
 
     def run(): Unit = {
-        //
+
         //Convert RDD[Set[String]] in RDD[Array[String]]
         val transactionsRDD: RDD[Array[String]] = transactions.map(_.toArray)
 
@@ -35,6 +31,5 @@ class FPGrowth( t: RDD[Set[String]], m: Double, n: Double) {
                 + ", " + rule.confidence)
         }
     }
-
 }
 
