@@ -6,10 +6,7 @@ class Event(val location: (Double, Double),
             val year: Int) extends Serializable{
 
   override def toString: String = {
-<<<<<<< HEAD
     location._1.toString + ", " + location._2.toString + ", " + depth.toString + ", " + magnitude.toString
-=======
-    location._1.toString + ", " + location._2 + ", " + depth + ", " + magnitude + ", " + year + '\n'
->>>>>>> melania
+
   }
 }

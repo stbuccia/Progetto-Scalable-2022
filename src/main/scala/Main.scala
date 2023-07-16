@@ -54,7 +54,7 @@ object Main{
     // Run clustering and update data with cluster info
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
     val numClusters = 5
-    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", false)
+    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", computeElbowMode = false)
 
     // Normalize data
     val normalizedData: RDD[(Int, Set[String])]= clusteredData.map(entry => (entry._1,labelConversion(entry._2)))
