@@ -5,7 +5,6 @@ import model.{Event, Hemisphere, Magnitude, Quadrant, Depth, Transaction}
 
 object mainDataConversion {
 
-<<<<<<< HEAD
   //def labelConversion(event: Event): Transaction = {
   def labelConversion(event: Event): Set[String] = {
  

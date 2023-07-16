@@ -11,7 +11,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, Row}
 
-import java.io.{File}
+import java.io.File
 
 
 /**
@@ -83,7 +83,7 @@ object EarthquakeKMeans {
       println(s"Cluster $clusterIndex size: $size")
     }
 
-<<<<<<< HEAD
+
     //// Discretize the extracted column using the trained K-means model
     //val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
       //val vector = Vectors.dense(value)
@@ -91,6 +91,7 @@ object EarthquakeKMeans {
       //(value, clusterIndex)
     //})
 
+    // Build and return the dataset together with cluster information
     val discretizedData = datasetRDD.map({ case (value, event) => {
         val vector = Vectors.dense(value)
         val clusterIndex = clusters.predict(vector)
@@ -99,6 +100,7 @@ object EarthquakeKMeans {
       })
     
     discretizedData
+
 
     //// Build and return the dataset together with cluster information
     //Guarda il discretizedData[(Double, Int) e lo confronta con il datasetIniziale RDD[(Double, Event)], in modo 
@@ -141,8 +143,6 @@ object EarthquakeKMeans {
     // ------------------------------------------------------------------------------------------------------
 */
 
-=======
->>>>>>> melania
 
 //    // Discretize the extracted column using the trained K-means model
 //    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
@@ -151,28 +151,12 @@ object EarthquakeKMeans {
 //      (value, clusterIndex)
 //    })
 
-<<<<<<< HEAD
+
     //val magClusterMap = discretizedData.collectAsMap()
     //val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
     //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
     //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
     //clusteredDataset
-=======
-    // Build and return the dataset together with cluster information
-//    val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
-//
-//    clusteredDataset.map(_._2)
-
-    // Build and return the dataset together with cluster information
-    val discretizedData = datasetRDD.map({ case (value, event) => {
-        val vector = Vectors.dense(value)
-        val clusterIndex = clusters.predict(vector)
-        (clusterIndex, event)
-        }
-      })
-
-    discretizedData
->>>>>>> melania
 
   }
 
