@@ -38,10 +38,39 @@ labelsToKeep = ['year', 'latitude', 'longitude', 'depth', 'mag']
 labelsToDrop = Diff(labels, labelsToKeep)
 df.drop(labels=labelsToDrop, axis=1, inplace=True)
 
+x = df['latitude'].isnull().sum()
+y = df['longitude'].isnull().sum()
+z = df['depth'].isnull().sum()
+q = df['mag'].isnull().sum()
+print("lat "+str(x))
+print("lon "+str(y))
+print("dep "+str(z))
+print("mag "+str(q))
+
+if(x>0):
+    print("Before latitude "+str(df.shape[0]))
+    df = df['latitude'].notnull()
+    print("After latitude "+str(df.shape[0]))
+
+if(y>0):
+    print("Before longitude "+str(df.shape[0]))
+    df = df['longitude'].notnull()
+    print("After longitude "+str(df.shape[0]))
+
+if(z>0):
+    print("Before depth "+str(df.shape[0]))
+    df = df.dropna(axis='rows')
+    print("After depth "+str(df.shape[0]))
+
+if(q>0):
+    print("Before mag "+str(df.shape[0]))
+    df = df['mag'].notnull()
+    print("After mag "+str(df.shape[0]))
+
 # scrivi file di output
 start = inputFiles[0][:7].replace('-','_')
 end = inputFiles[len(inputFiles)-1][:7].replace('-','_')
 #fileName = 'dataset_from_' +start +'_to_' +end +'.csv'
-fileName = 'test_2.5.csv'
-df.to_csv(csv_path_output + fileName, index=False) 
-print("Nuovo file creato: ", csv_path_output + fileName)
+fileName = "newDataset.csv"
+df.to_csv(csv_path_output + fileName, index=False)
+print("Nuovo file creato: ", csv_path_output + fileName) 

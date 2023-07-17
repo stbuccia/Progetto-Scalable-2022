@@ -15,6 +15,7 @@ object mainDataConversion {
     val sc = new SparkContext(conf)
 
     val inputFilePath = "src/main/resources/dataset_from_1990_01_to_2022_12.csv"
+    //val inputFilePath = "src/main/resources/dataset_from_2010_01_to_2021_12.csv"
 
     println("Read CSV file...")
     var rdd = readCSV(sc, inputFilePath)

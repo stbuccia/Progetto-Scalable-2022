@@ -23,122 +23,59 @@ Argomenti main:
  */
 
 
-object newBasicAprioriMapReduce {
+class newBasicAprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apriori[RDD[Set[String]]] {
 
-  var times = new Array[Int](0)
+  override var transactions: RDD[Set[String]] = dataset
+  var rdd_size: Double = transactions.count().toDouble
+  /*
+  * var itemSet : Set[String] = Set("SH", "NH", "Q1", "Q2", "Q3", "Q4", "LOW_MAG", "MED_MAG", "HIGH_MAG", "LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
+  var transactions: T
+  var minSupport: Double = 0.6
+  var minConfidence: Double = 0.7
+  var frequentItemsets: Set[(Set[String], Int)] = Set()
+  var associationRules: List[(Set[String], Set[String], Double)] = List()
+  * */
 
-  def main(args: Array[String]): Unit = {
+  override def run(): RDD[(Set[String], Set[String], Double)] = {
 
-    if (args.length != 3) {
-      println("Missing arguments!")
-      System.exit(1)
-    }
+    val rdd_itemsets_1 = countItemsetsSize1(transactions, rdd_size, minSupport)
 
-    val master = args(0)
-    val inputFilePath = args(1)
-    val outputFilePath = args(2)
-
-    println("newBasicAprioriMapReduce")
-    println("Configuration:")
-    println(s"- master: $master")
-    println(s"- dataset path: $inputFilePath")
-    println(s"- output folder: $outputFilePath")
-
-    val appName = "EarthquakeBasicAprioriMapReduce"
-    val sparkSession = SparkSession.builder()
-      .appName(appName)
-      .master(master)
-      .getOrCreate()
-    val sc = sparkSession.sparkContext
-    sc.setLogLevel("WARN")
-
-    val min_support = 0.2
-    val confidence = 0.7
-    val labelSet: Set[String] = Set("SH", "NH", "Q1", "Q2", "Q3", "Q4", "LOW_MAG", "MED_MAG", "HIGH_MAG", "LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
-
-
-    println("Read CSV file...")
-    val rdd = time(readCSV(sc, inputFilePath)).filter(x => Set("MED_MAG").subsetOf(x))
-    val rdd_size = rdd.count().toDouble
-
-
-    val rdd_itemsets_1 = time(countItemsetsSize1(rdd, rdd_size, min_support))
-
-    var rdd_itemsets = time(generateAndCountItemset(rdd, rdd_itemsets_1, labelSet, rdd_size, min_support, 2))
+    var rdd_itemsets = generateAndCountItemset(transactions, rdd_itemsets_1, itemSet, rdd_size, minSupport, 2)
 
     var i = 3
     var stop = false
-    while (i<5 && !stop) {
-      var rdd_itemsets_N = time(generateAndCountItemset(rdd, rdd_itemsets.filter(_._1.size==i-1), labelSet, rdd_size, min_support, i))
-
-
-      if(rdd_itemsets_N.isEmpty) {
+    while (i < 5 && !stop) {
+      var rdd_itemsets_N = generateAndCountItemset(transactions, rdd_itemsets.filter(_._1.size == i - 1), itemSet, rdd_size, minSupport, i)
+      if (rdd_itemsets_N.isEmpty) {
         stop = true
         println("    - Empty")
       }
       else
         rdd_itemsets = rdd_itemsets.union(rdd_itemsets_N)
-
       i = i + 1
     }
 
-
     println("\nAssociation Rules:")
-    val associationRules = time(generateAssociationRules(rdd_itemsets, confidence, rdd))
+    val associationRules = generateAssociationRules(rdd_itemsets, minConfidence, transactions)
 
 
-    val dir = new Directory(new File(outputFilePath))
-    if(dir.exists) {
-      dir.deleteRecursively()
-    }
-
-    println("\nWrite association rules on CSV file...")
-    time(writeCSV(associationRules, outputFilePath))
-
-
-    println("\n\n-------------------------------------------")
-    println("Times: "+times.mkString("\t"))
-    println("Total time: "+times.sum)
-    println("\n\n-------------------------------------------")
-
-
-    // ELIMINARE per esecuzioni su cloud
-    // servono solo per poter visualizzare i dati su SparkUI nel caso di esecuzione in locale
-    if(master.contains("local")) {
-      println("\nMain method complete. Press Enter.")
-      readLine()
-    }
+    associationRules
 
   }
 
-  def writeCSV(rdd: RDD[(Set[String], Set[String], Double)], outputPath: String) = {
-    rdd
-      .map(x => toCSVLine(x))
-      .coalesce(1)
-      .saveAsTextFile(outputPath)
-  }
-
-  def readCSV(sc: SparkContext, path: String) = {
-    val rdd = sc.textFile(path)
-      .map( x => x.split(",") )
-      .map( _.toSet )
-      .persist()
-    //TODO questa count() non è necessaria
-    //println("   - Read " + rdd.count() + " lines")
-    rdd
-  }
 
   def countItemsetsSize1(rdd: RDD[Set[String]], rdd_size: Double, min_sup: Double) = {
     println("\nGenerate itemsets with size 1...")
     val output = rdd
-      .flatMap( x => x.map( y => (Set(y),1) ) )
-      .reduceByKey( (x,y) => x + y)
-    //TODO questa count() è necessaria? si, perchè viene passato come parametro a tutte le fasi, lo calcolo solo una volta
-      .filter( x =>  (x._2.toDouble / rdd_size) >= min_sup )
-      //.collect()
+      .flatMap(x => x.map(y => (Set(y), 1)))
+      .reduceByKey((x, y) => x + y)
+      //TODO questa count() è necessaria? si, perchè viene passato come parametro a tutte le fasi, lo calcolo solo una volta
+      .filter(x => (x._2.toDouble / rdd_size) >= min_sup)
+    //.collect()
     //printItemsets(output, rdd_size)
     output
   }
+
 
   def generateAndCountItemset(rdd: RDD[Set[String]],
                               rdd_itemsets: RDD[(Set[String], Int)],
@@ -159,23 +96,23 @@ object newBasicAprioriMapReduce {
     output
   }
 
-  def generateItemsetsSizeN(itemset: Set[String], labelSet: Set[String])= {
+  def generateItemsetsSizeN(itemset: Set[String], labelSet: Set[String]) = {
     labelSet
-      .filter( x => !itemset.contains(x) )
-      .map( x => itemset + x )
+      .filter(x => !itemset.contains(x))
+      .map(x => itemset + x)
   }
+
 
   def countItemsetsSizeN(rdd: RDD[Set[String]], itemsets: Set[Set[String]], rdd_size: Double, min_sup: Double) = {
     rdd
       .flatMap(rdd_row =>
         itemsets
-          .filter(itemset => itemset.subsetOf(rdd_row) )
-          .map(itemset => (itemset,1))
+          .filter(itemset => itemset.subsetOf(rdd_row))
+          .map(itemset => (itemset, 1))
       )
       .reduceByKey((x, y) => x + y)
       .filter(x => (x._2.toDouble / rdd_size) >= min_sup)
   }
-
 
 
   def generateAssociationRulesFromSubset(rdd: RDD[Set[String]],
@@ -191,30 +128,24 @@ object newBasicAprioriMapReduce {
       .filter(x => x._3 >= confidence)
 
     //TODO è necessaria la reverseRules?
-/*
-    val reverseRules = rdd
-      .filter(x => (itemset -- subItemset).subsetOf(x))
-      .map(x => ((itemset -- subItemset), 1))
-      .reduceByKey((x, y) => x + y)
-      .map(x => (x._1, itemset -- (itemset -- subItemset), itemset_support / x._2.toDouble))
-      .filter(x => x._3 >= confidence)
-
-    rules ++ reverseRules
-
- */
+    /*
+        val reverseRules = rdd
+          .filter(x => (itemset -- subItemset).subsetOf(x))
+          .map(x => ((itemset -- subItemset), 1))
+          .reduceByKey((x, y) => x + y)
+          .map(x => (x._1, itemset -- (itemset -- subItemset), itemset_support / x._2.toDouble))
+          .filter(x => x._3 >= confidence)
+    
+        rules ++ reverseRules
+    
+     */
     rules
   }
 
-  def printItemsets(rdd_itemsets:  RDD[(Set[String], Int)], rdd_size: Double) = {
-    rdd_itemsets.zipWithIndex
-      .foreach(x => println("    - Itemset " + x._2 + ": " + x._1._1.mkString(",") + "  " + (x._1._2 / rdd_size) * 100))
-  }
-
-  
 
   def generateAssociationRules(rdd_itemsets: RDD[(Set[String], Int)],
                                confidence: Double,
-                               rdd: RDD[Set[String]] ) = {
+                               rdd: RDD[Set[String]]) = {
 
     val array_subsets = rdd_itemsets
       .flatMap(itemset => {
@@ -226,7 +157,7 @@ object newBasicAprioriMapReduce {
       .flatMap(rdd_row => {
         array_subsets
           .filter(subset => subset.subsetOf(rdd_row))
-          .map(subset => (subset,1))
+          .map(subset => (subset, 1))
       })
       .reduceByKey((x, y) => x + y)
       .collect()
@@ -238,51 +169,12 @@ object newBasicAprioriMapReduce {
           .map(subset_pair => (subset_pair._1, itemset._1 -- subset_pair._1, itemset._2.toDouble / subset_pair._2.toDouble))
           .filter(rule => rule._3 >= confidence)
           .sortBy(_._3)
+          //.sortBy(_._3, ascending = false)
         //TODO sort
       })
 
     associationRules
   }
-
-  def printAssociationRules(rddRules: Array[(Set[String], Set[String], Double)]) = {
-    rddRules.foreach(rule =>
-      println("    - Rule: " + rule._1.mkString(",") + " --> " + rule._2.mkString(",")
-        + "  confidence: " + rule._3)
-    )
-  }
-
-
-  def toCSVLine(x: (Set[String], Set[String], Double)): String = {
-    x._1.mkString("--") + ",  " + x._2.mkString("--") + ",   " + x._3
-  }
-
-  //def saveAsCSVFile(rdd: RDD[(Set[String], Set[String], Double)], output_file_path: String) = {
-  def saveAsCSVFile(rdd: RDD[(Set[String], Set[String], Double)], output_file_path: String) = {
-    val pwCSV = new PrintWriter(
-      new File(output_file_path)
-    )
-
-    rdd
-      .collect()
-      .foreach(x => {
-        pwCSV.write(toCSVLine(x) + "\n")
-    })
-
-    pwCSV.close()
-  }
-
-
-  def time[R](block: => R): R = {
-    val t0 = System.nanoTime()
-    val result = block // call-by-name
-    val t1 = System.nanoTime()
-    var t = (t1 - t0)/1000000
-    println("Elapsed time: " + (t1 - t0)/1000000 + "ms")
-    times = times :+ t.toInt
-    result
-  }
-
-
 
 }
 
