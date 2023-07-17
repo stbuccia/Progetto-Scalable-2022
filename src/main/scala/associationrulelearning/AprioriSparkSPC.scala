@@ -4,7 +4,7 @@ import org.apache.spark.rdd.RDD
 import scala.annotation.tailrec
 
 
-class AprioriSparkSPC(t: RDD[Set[String]], m: Double, n: Double) extends AprioriSpark(t, m, n) {
+class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
 
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
@@ -37,6 +37,7 @@ class AprioriSparkSPC(t: RDD[Set[String]], m: Double, n: Double) extends Apriori
     //conf.set("spark.driver.allowMultipleContexts","true");
     //val sc = new SparkContext(conf)
     //val transactionsRdd = sc.parallelize(transactions)
+
     val transactionsRdd = (transactions)
 
     val setL_1 = phase1(transactionsRdd)

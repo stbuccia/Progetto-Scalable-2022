@@ -8,9 +8,9 @@ lazy val root = (project in file("."))
   .settings(
     name := "apriori-association-rule-mining-earthquake-prediction",
     libraryDependencies ++= Seq(
-      "org.apache.spark" %% "spark-core" % "3.2.1" % "provided",
-      "org.apache.spark" %% "spark-sql" % "3.2.1" % "provided",
-      "org.apache.spark" %% "spark-mllib" % "3.2.1" % "provided"
+      "org.apache.spark" %% "spark-core" % "3.2.1" ,
+      "org.apache.spark" %% "spark-sql" % "3.2.1",
+      "org.apache.spark" %% "spark-mllib" % "3.2.1"
     ),
     assembly / assemblyJarName := "apriori-arm.jar",
     assembly / assemblyMergeStrategy := {
@@ -24,6 +24,3 @@ lazy val root = (project in file("."))
 // evilplot
 resolvers += Resolver.bintrayRepo("cibotech", "public")
 libraryDependencies += "io.github.cibotech" %% "evilplot" % "0.8.1"
-
-// log4j
-libraryDependencies += "log4j" % "log4j" % "1.2.14"

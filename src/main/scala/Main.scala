@@ -1,10 +1,9 @@
-import associationrulelearning.runApriori.runAprioriSeq
-import associationrulelearning.AprioriSparkSPC
+import associationrulelearning.{AprioriSeq, AprioriSparkSPC, FPGrowth}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
-
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
+
 import scala.io.StdIn.readLine
 
 
@@ -65,17 +64,28 @@ object Main{
       println(s"Computing cluster $clusterIndex...")
       val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
 
-      // Run Single Pass Count Apriori
-      val alg = new AprioriSparkSPC(transactions, 0.6, 0.7)
-      alg.run()
-
-//      // Run FPGrowth algorithm
-//      val alg = new FPGrowth(transactions, 0.6, 0.7)
+      // Run sequential naive algorithm
+//      val alg = new AprioriSeq(transactions)
 //      alg.run()
 
-//      // Run sequential naive algorithm
-//      runAprioriSeq(sc, transactions)
+      // Run Single Pass Count Apriori
+            val alg = new AprioriSparkSPC(transactions)
+            alg.run()
+
+      // Run FPGrowth algorithm
+//            val alg = new FPGrowth(transactions)
+//            alg.run()
+
+
+      // Print results
+      println("===Frequent Itemsets===")
+      alg.frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+      println("===Association Rules===")
+      alg.associationRules.foreach { case (lhs, rhs, confidence) =>
+        println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+      }
     }
+
 
     sparkSession.stop()
 
