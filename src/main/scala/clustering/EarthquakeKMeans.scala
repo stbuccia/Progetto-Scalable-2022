@@ -11,7 +11,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, Row}
 
-import java.io.{File}
+import java.io.File
 
 
 /**
@@ -44,6 +44,7 @@ object EarthquakeKMeans {
     // Loading dataset
 
     val datasetRDD = datasetDF.rdd.map(fromRowToRddEntry)
+
 
     val datasetColumn = datasetDF.rdd.map(row => row(dimension).toString.toDouble)
     val vectors: RDD[org.apache.spark.mllib.linalg.Vector] = datasetColumn.map(value => Vectors.dense(value))
@@ -83,17 +84,12 @@ object EarthquakeKMeans {
     }
 
 
-//    // Discretize the extracted column using the trained K-means model
-//    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
-//      val vector = Vectors.dense(value)
-//      val clusterIndex = clusters.predict(vector)
-//      (value, clusterIndex)
-//    })
-
-    // Build and return the dataset together with cluster information
-//    val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
-//
-//    clusteredDataset.map(_._2)
+    //// Discretize the extracted column using the trained K-means model
+    //val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
+      //val vector = Vectors.dense(value)
+      //val clusterIndex = clusters.predict(vector)
+      //(value, clusterIndex)
+    //})
 
     // Build and return the dataset together with cluster information
     val discretizedData = datasetRDD.map({ case (value, event) => {
@@ -102,8 +98,65 @@ object EarthquakeKMeans {
         (clusterIndex, event)
         }
       })
-
+    
     discretizedData
+
+
+    //// Build and return the dataset together with cluster information
+    //Guarda il discretizedData[(Double, Int) e lo confronta con il datasetIniziale RDD[(Double, Event)], in modo 
+    //Bisognerebbe usare una reduceByKey?
+    //val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
+        //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
+
+    //clusteredDataset.map(_._2)
+
+    //// Build and return the dataset together with cluster information
+    //val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
+    //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
+    //clusteredDataset.map(_._2)
+
+
+
+/*
+    // -------------------------------------------------------------------------------------------------------------
+    // Questa parte commentata è servita solo a verificare che tutte le coppie (Double, Int) con chiave k1
+    // avessero lo stesso valore v1 associato.
+    // La prima println restituisce 0, invece, la seconda restituisce il numero di chiavi distinte:
+    //      280 è il numero di chiavi distinte per il dataset_from_2020_01_to_2021_12.csv
+    //      340 è il numero di chiavi distinte per il dataset_from_2010_01_to_2021_12.csv
+    //val discretizedDataByKey = discretizedData.reduceByKey((x, y) => if (x == y) x else -100)
+    //println("count ERROR " + discretizedDataByKey.filter(_._2 == -100).count())
+    //println("count OK " + discretizedDataByKey.filter(_._2 != -100).count())
+    //discretizedDataByKey.foreach(x => println("reduceByKey " + x._1 + " " + x._2))
+    //val magClusterMap = discretizedDataByKey.collectAsMap()
+
+    // SCOMMENTA QUI SOTTO
+    // Trasforma RDD in Map eliminando tutte le coppie (Double, Int) ripetute
+    val magClusterMap = discretizedData.collectAsMap()
+    val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
+    // TODO le 2 println segunti possono essere eliminate
+    println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
+    clusteredDataset
+    // ------------------------------------------------------------------------------------------------------
+*/
+
+
+//    // Discretize the extracted column using the trained K-means model
+//    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
+//      val vector = Vectors.dense(value)
+//      val clusterIndex = clusters.predict(vector)
+//      (value, clusterIndex)
+//    })
+
+
+    //val magClusterMap = discretizedData.collectAsMap()
+    //val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
+    //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
+    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
+    //clusteredDataset
 
   }
 

@@ -7,19 +7,15 @@ import scala.util.control.Breaks.{break, breakable}
  * Class for sequential version of Apriori algorithm
  *
  */
-class AprioriSeq(dataset: RDD[Set[String]], threshold: Double, confidence: Double) extends Serializable with Apriori[Seq[Set[String]]] {
+class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Seq[Set[String]]] {
 
   override var transactions: Seq[Set[String]] = dataset.collect().toSeq
+  var minSupportCount: Int = (minSupport * transactions.length).toInt
 
-  // Set minimum support and minimum confidence
-  override var minSupport: Int = (threshold * transactions.length).toInt
-  override var minConfidence: Double = confidence
-
-  // Define local vars
   var generatedItemsets : Map[Set[String], Int] = Map()
 
-  var frequentItemsets: Set[Set[String]] = Set()
-  var associationRules : List[(Set[String], Set[String], Double)] = List()
+//  var frequentItemsets: Set[Set[String]] = Set()
+//  var associationRules : List[(Set[String], Set[String], Double)] = List()
 
 
   /**
@@ -47,10 +43,10 @@ class AprioriSeq(dataset: RDD[Set[String]], threshold: Double, confidence: Doubl
    */
   private def generateAssociationRules(): Unit = {
     frequentItemsets.foreach(itemset =>
-      itemset.subsets.filter(subset => (subset.nonEmpty & subset.size < itemset.size))
-        .foreach(subset => {associationRules = associationRules :+ (subset, itemset diff subset,
-                                                                       generatedItemsets(itemset).toDouble/generatedItemsets(subset).toDouble)}
-    ))
+      itemset._1.subsets.filter(subset => (subset.nonEmpty & subset.size < itemset._1.size))
+        .foreach(subset => {associationRules = associationRules :+ (subset, itemset._1 diff subset,
+          generatedItemsets(itemset._1).toDouble/generatedItemsets(subset).toDouble)}
+        ))
     associationRules = associationRules.filter( rule => rule._3>=minConfidence)
   }
 
@@ -92,7 +88,7 @@ class AprioriSeq(dataset: RDD[Set[String]], threshold: Double, confidence: Doubl
     }
 
     // Save frequent itemsets
-    frequentItemsets = generatedItemsets.keySet
+    frequentItemsets = generatedItemsets.map{ case(k,v) => (k,v)}(collection.breakOut) : Set[(Set[String], Int)]
 
     // Generate association rules
     generateAssociationRules()
