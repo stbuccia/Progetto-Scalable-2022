@@ -61,7 +61,7 @@ object Main{
 
     // Run clustering and update data with cluster info
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
-    val numClusters = 5
+    val numClusters = 8
     val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", computeElbowMode = false)
 
     // Normalize data
@@ -74,16 +74,16 @@ object Main{
       val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
 
       // Run sequential naive algorithm
-//      val alg = new AprioriSeq(transactions)
-//      time("run Apriori Sequential", alg.run())
+      val alg = new AprioriSeq(transactions)
+      time("run Apriori Sequential", alg.run())
 
       // Run Single Pass Count Apriori
 //            val alg = new AprioriSparkSPC(transactions)
 //            time("run Apriori SPC", alg.run())
 
       // Run FPGrowth algorithm
-            val alg = new FPGrowth(transactions)
-            time("run FPGrowth", alg.run())
+//            val alg = new FPGrowth(transactions)
+//            time("run FPGrowth", alg.run())
 
 
       // Print results

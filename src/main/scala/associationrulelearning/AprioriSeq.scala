@@ -14,9 +14,6 @@ class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Se
 
   var generatedItemsets : Map[Set[String], Int] = Map()
 
-//  var frequentItemsets: Set[Set[String]] = Set()
-//  var associationRules : List[(Set[String], Set[String], Double)] = List()
-
 
   /**
    * Counts the occurences of the given itemset inside the dataset
@@ -57,7 +54,7 @@ class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Se
     val singletonSet: Set[Set[String]] = itemSet.subsets().filter(_.size == 1).toSet
     singletonSet.foreach(singleton => {
       val singletonSupport = getSupport(singleton)
-      if (singletonSupport >= minSupport) generatedItemsets += (singleton->singletonSupport)})
+      if (singletonSupport >= minSupportCount) generatedItemsets += (singleton->singletonSupport)})
 
 
     // Find frequent itemsets
@@ -71,7 +68,7 @@ class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Se
 
         // Deleting itemsets which do not satisfy minimum support
         var candidatesSet = joinSet.map(itemset => (itemset, getSupport(itemset)))
-          .filter(pair => pair._2 >= minSupport)
+          .filter(pair => pair._2 >= minSupportCount)
 
         // Deleting itemsets whose subsets do not satisfy minimum support
         candidatesSet = prune(candidatesSet)
