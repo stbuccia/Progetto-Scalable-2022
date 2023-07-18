@@ -1,4 +1,4 @@
-import associationrulelearning.{AprioriSeq, AprioriSparkSPC, FPGrowth}
+import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
 import org.apache.spark.sql.SparkSession
@@ -69,12 +69,15 @@ object Main{
 //      alg.run()
 
       // Run Single Pass Count Apriori
-            val alg = new AprioriSparkSPC(transactions)
-            alg.run()
+       //     val alg = new AprioriSparkSPC(transactions)
+        //    alg.run()
 
       // Run FPGrowth algorithm
 //            val alg = new FPGrowth(transactions)
 //            alg.run()
+
+      val alg = new AprioriMapReduce(transactions)
+      alg.run()
 
 
       // Print results
