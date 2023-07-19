@@ -1,6 +1,8 @@
 import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
+import org.apache.spark.HashPartitioner
+import org.apache.spark.Partitioner
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
 
@@ -59,6 +61,7 @@ object Main{
     val normalizedData: RDD[(Int, Set[String])]= clusteredData.map(entry => (entry._1,labelConversion(entry._2)))
 
 
+
     // Run algorithm for each cluster
     for (clusterIndex <- 0 until numClusters) {
       println()
@@ -91,7 +94,10 @@ object Main{
 
     }
 
-    //Utils.time("AprioriMapReduceFOR", runAprioriMapReduceOnCluster(numClusters, normalizedData))
+
+
+    //val partitionedRDD: RDD[(Int, Set[String])]= normalizedData.partitionBy(new HashPartitioner(numClusters))
+    //Utils.time("AprioriMapReduce", runAprioriMapReduceOnCluster(numClusters, partitionedRDD))
 
     sparkSession.stop()
 
@@ -104,7 +110,7 @@ object Main{
   }
 
 
-  def runAprioriMapReduceOnCluster(numClusters: Int, normalizedData: RDD[(Int, Set[String])]) = {
+  private def runAprioriMapReduceOnCluster(numClusters: Int, normalizedData: RDD[(Int, Set[String])]): Unit = {
     for (clusterIndex <- 0 until numClusters) {
       println()
       println(s"Computing cluster $clusterIndex...")
