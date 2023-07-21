@@ -15,8 +15,10 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
       recursivePhase2(transactionsRdd, k + 1, setL.union(setL_k))
   }
 
-  private def generateAssociationRules(frequentItemsets: RDD[(Set[String], Int)], minConfidence: Double): RDD[(Set[String], Set[String], Double)] = {
-    val frequentItemsetsList = frequentItemsets.collect()
+  //private def generateAssociationRules(frequentItemsets: RDD[(Set[String], Int)], minConfidence: Double): RDD[(Set[String], Set[String], Double)] = {
+  private def generateAssociationRules(frequentItemsets: Set[(Set[String], Int)], minConfidence: Double): List[(Set[String], Set[String], Double)] = {
+    //val frequentItemsetsList = frequentItemsets.collect()
+    val frequentItemsetsList = frequentItemsets.toList
 
     val associationRules = frequentItemsets.flatMap { case (itemset, support) =>
       val subsets = itemset.subsets().toList.filter(_.nonEmpty)//.filter(_.size == itemset.size - 1)
@@ -27,7 +29,7 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
       }
     }
     // Filter rules based on confidence
-    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence)
+    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence).toList
   }
 
   override def run() = {
@@ -43,19 +45,22 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
     val setL_1 = phase1(transactionsRdd)
     val setL_2 = setL_1.union(phase2(transactionsRdd, 2, setL_1))
 
-    val out = recursivePhase2(transactionsRdd, 3, setL_2)
-    out.collect().foreach(println)
+
+    frequentItemsets = recursivePhase2(transactionsRdd, 3, setL_2).collect().toSet
+    //frequentItemsets.collect().foreach(println)
 
 
-    val frequentItemsets: RDD[(Set[String], Int)] = out // Your RDD of frequent itemsets
+    //frequentItemsets: RDD[(Set[String], Int)] = out // Your RDD of frequent itemsets
     val minConfidence: Double = 0.7 // Minimum confidence threshold
 
-    val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(frequentItemsets, minConfidence)
+    associationRules/*: RDD[(Set[String], Set[String], Double)]*/ = generateAssociationRules(frequentItemsets, minConfidence)
 
     // Print the association rules
+    /*
     associationRules.foreach { case (lhs, rhs, confidence) =>
       println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
     }
+    */
 
     //sc.stop()
   }

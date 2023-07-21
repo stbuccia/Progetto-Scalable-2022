@@ -61,7 +61,7 @@ object Main{
     val normalizedData: RDD[(Int, Set[String])]= clusteredData.map(entry => (entry._1,labelConversion(entry._2)))
 
 
-
+/*
     // Run algorithm for each cluster
     for (clusterIndex <- 0 until numClusters) {
       println()
@@ -69,12 +69,12 @@ object Main{
       val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
 
       // Run sequential naive algorithm
-      val alg = new AprioriSeq(transactions)
-      alg.run()
+      //val alg = new AprioriSeq(transactions)
+      //alg.run()
 
       // Run Single Pass Count Apriori
-       //     val alg = new AprioriSparkSPC(transactions)
-        //    alg.run()
+      val alg = new AprioriSparkSPC(transactions)
+      alg.run()
 
       // Run FPGrowth algorithm
 //            val alg = new FPGrowth(transactions)
@@ -93,11 +93,15 @@ object Main{
       }
 
     }
-
+*/
 
 
     //val partitionedRDD: RDD[(Int, Set[String])]= normalizedData.partitionBy(new HashPartitioner(numClusters))
     //Utils.time("AprioriMapReduce", runAprioriMapReduceOnCluster(numClusters, partitionedRDD))
+
+
+    Utils.time("AprioriSPC", runAprioriSPCOnCluster(numClusters, normalizedData))
+
 
     sparkSession.stop()
 
@@ -130,7 +134,25 @@ object Main{
     }
   }
 
+  private def runAprioriSPCOnCluster(numClusters: Int, normalizedData: RDD[(Int, Set[String])]): Unit = {
+    for (clusterIndex <- 0 until numClusters) {
+      println()
+      println(s"Computing cluster $clusterIndex...")
+      val transactions: RDD[Set[String]] = normalizedData.filter(_._1 == clusterIndex).map(_._2)
+      val alg = new AprioriSparkSPC(transactions)
+      alg.run()
 
+
+      // Print results
+      println("===Frequent Itemsets===")
+      alg.frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+      println("===Association Rules===")
+      alg.associationRules.foreach { case (lhs, rhs, confidence) =>
+        println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+      }
+      println()
+    }
+  }
 
 
 }

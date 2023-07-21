@@ -21,12 +21,21 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
       .map(tuples => tuples._1 | tuples._2)
       .filter(_.size == k)
       .distinct()
+      .collect()
 
-    val setL_k = setC_k.cartesian(transactionsRdd)
+    /*val setL_k = setC_k.cartesian(transactionsRdd)
       .filter(tuple => tuple._1.subsetOf(tuple._2))
       .map(tuple => (tuple._1, 1))
       .reduceByKey((x, y) => x + y)
-      .filter(item => item._2 > minSupport) 
+      .filter(item => item._2 > minSupport)*/
+
+    val setL_k = transactionsRdd
+      .flatMap(transaction =>
+        setC_k.filter(itemsetC => itemsetC.subsetOf(transaction))
+          .map(itemsetC => (itemsetC,1))
+      )
+      .reduceByKey((x, y) => x + y)
+      .filter(item => item._2 > minSupport)
 
     setL_k
   }
