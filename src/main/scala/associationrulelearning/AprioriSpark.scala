@@ -9,27 +9,47 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
   var minSupportCount: Int = (minSupport * transactions.count()).toInt
 
 
+  /**
+   * Generates 1-dimensional frequent itemsets for transactionsRdd
+   *
+   * @param transactionsRdd dataset where to look for frequent itemsets
+   * @return  an RDD of 1-dim frequent itemsets together with their support
+   */
   protected def phase1(transactionsRdd: RDD[Set[String]]) = {
-    transactionsRdd.flatMap(itemset => itemset.map(item => (Set(item), 1))).reduceByKey((x, y) => x + y).filter(item => item._2 > minSupport)
+    transactionsRdd.flatMap(itemset => itemset.map(item => (Set(item), 1))).reduceByKey((x, y) => x + y).filter(item => item._2 > minSupportCount)
   }
 
 
   protected def phase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
+
     val setL_strings = setL.map(_._1)
 
     val setC_k = setL_strings.cartesian(setL_strings)
       .map(tuples => tuples._1 | tuples._2)
       .filter(_.size == k)
-      .distinct()
+      .distinct().collect()
 
-    val setL_k = setC_k.cartesian(transactionsRdd)
-      .filter(tuple => tuple._1.subsetOf(tuple._2))
-      .map(tuple => (tuple._1, 1))
+    val setL_k = transactionsRdd
+      .flatMap(transaction =>
+        setC_k.filter(itemsetC => itemsetC.subsetOf(transaction))
+          .map(itemsetC => (itemsetC,1))
+      )
       .reduceByKey((x, y) => x + y)
-      .filter(item => item._2 > minSupport) 
+      .filter(item => item._2 > minSupportCount)
 
     setL_k
   }
+
+  def candidateExistsInTransaction(candidate: Set[String], transaction: Set[String]): Boolean = {
+    // all elements in candidate exist in transaction
+    var result = true
+    for (elem <- candidate) {
+      if (!transaction.contains(elem))
+        result = false
+    }
+    result
+  }
+
 
 
   def run() = {

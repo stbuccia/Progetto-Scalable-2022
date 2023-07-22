@@ -64,7 +64,7 @@ class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Se
         println("Searching for " + k + " dimensional frequent itemsets")
 
         // Creating a set of all the possible subsets of dimension k
-        val joinSet = itemSet.subsets().filter(_.size == k).toSet
+        val joinSet = itemSet.subsets(k).toSet
 
         // Deleting itemsets which do not satisfy minimum support
         var candidatesSet = joinSet.map(itemset => (itemset, getSupport(itemset)))

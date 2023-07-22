@@ -8,15 +8,22 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
 
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
+    println("Performing a recusive call to phase2 (k = " + k + ") of AprioriSPC..")
     val setL_k = phase2(transactionsRdd, k, setL)
-    if (setL_k.count() == 0)
+    println("Done! Found a new L dimensional set. Printing its contents..")
+    if (setL_k.isEmpty()) {
+      println("No more recursive calls cause L set is empty")
       setL
-    else
+    } else {
+      println("Going to check for another dimension cause L set is not empty yet")
       recursivePhase2(transactionsRdd, k + 1, setL.union(setL_k))
+    }
   }
 
-  private def generateAssociationRules(frequentItemsets: RDD[(Set[String], Int)], minConfidence: Double): RDD[(Set[String], Set[String], Double)] = {
-    val frequentItemsetsList = frequentItemsets.collect()
+
+  private def generateAssociationRules(frequentItemsets: Set[(Set[String], Int)], minConfidence: Double): List[(Set[String], Set[String], Double)] = {
+
+    val frequentItemsetsList = frequentItemsets.toList
 
     val associationRules = frequentItemsets.flatMap { case (itemset, support) =>
       val subsets = itemset.subsets().toList.filter(_.nonEmpty)//.filter(_.size == itemset.size - 1)
@@ -27,36 +34,20 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
       }
     }
     // Filter rules based on confidence
-    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence)
+    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence).toList
+
   }
 
   override def run() = {
     //TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)
 
-    //val conf = new SparkConf().setAppName("apriori-sequential").setMaster("local[1]")
-    //conf.set("spark.driver.allowMultipleContexts","true");
-    //val sc = new SparkContext(conf)
-    //val transactionsRdd = sc.parallelize(transactions)
-
     val transactionsRdd = (transactions)
 
-    val setL_1 = phase1(transactionsRdd)
+    val setL_1 = phase1(transactionsRdd)  // returns a set with only minSupport entries
     val setL_2 = setL_1.union(phase2(transactionsRdd, 2, setL_1))
 
-    val out = recursivePhase2(transactionsRdd, 3, setL_2)
-    out.collect().foreach(println)
+    frequentItemsets = recursivePhase2(transactionsRdd, 3, setL_2).collect().toSet
+    associationRules = generateAssociationRules(frequentItemsets, minConfidence)
 
-
-    val frequentItemsets: RDD[(Set[String], Int)] = out // Your RDD of frequent itemsets
-    val minConfidence: Double = 0.7 // Minimum confidence threshold
-
-    val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(frequentItemsets, minConfidence)
-
-    // Print the association rules
-    associationRules.foreach { case (lhs, rhs, confidence) =>
-      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
-    }
-
-    //sc.stop()
   }
 }
