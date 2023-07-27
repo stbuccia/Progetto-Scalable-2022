@@ -9,6 +9,7 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
   var minSupportCount: Int = (minSupport * transactions.count()).toInt
 
 
+
   /**
    * Generates 1-dimensional frequent itemsets for transactionsRdd
    *

@@ -10,13 +10,14 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
 
   override def run(): Unit = {
 
+
     val rdd_itemsets_1 = countItemsetsSize1(transactions, rdd_size, minSupport)
     var rdd_itemsets = generateAndCountItemset(transactions, rdd_itemsets_1, itemSet, rdd_size, minSupport, 2)
 
     var i = 3
     var stop = false
     while (i < 5 && !stop) {
-      var rdd_itemsets_N = generateAndCountItemset(transactions, rdd_itemsets.filter(_._1.size == i - 1), itemSet, rdd_size, minSupport, i)
+      val rdd_itemsets_N = generateAndCountItemset(transactions, rdd_itemsets.filter(_._1.size == i - 1), itemSet, rdd_size, minSupport, i)
       if (rdd_itemsets_N.isEmpty) {
         stop = true
         //println("    - Empty")
@@ -25,12 +26,17 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
         rdd_itemsets = rdd_itemsets.union(rdd_itemsets_N)
       i = i + 1
     }
-    frequentItemsets = rdd_itemsets.collect().toSet
 
-    //println("\nAssociation Rules:")
-    associationRules = generateAssociationRules(rdd_itemsets, minConfidence, transactions).collect().toList
+    val frequentItemsets: RDD[(Set[String], Int)] = rdd_itemsets
+    val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(rdd_itemsets, minConfidence, transactions)
 
-    printResults()
+    println("===Frequent Itemsets===")
+    frequentItemsets.collect().sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+
+    println("===Association Rules===")
+    associationRules.foreach { case (lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
   }
 
 

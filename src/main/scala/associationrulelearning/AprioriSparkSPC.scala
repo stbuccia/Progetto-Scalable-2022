@@ -6,6 +6,7 @@ import scala.annotation.tailrec
 
 class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
 
+
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
     val setL_k = phase2(transactionsRdd, k, setL)
@@ -16,9 +17,9 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
     }
   }
 
-  private def generateAssociationRules(frequentItemsets: Set[(Set[String], Int)], minConfidence: Double): List[(Set[String], Set[String], Double)] = {
+  private def generateAssociationRules(frequentItemsets: RDD[(Set[String], Int)], minConfidence: Double): RDD[(Set[String], Set[String], Double)] = {
 
-    val frequentItemsetsList = frequentItemsets.toList
+    val frequentItemsetsList = frequentItemsets.collect().toList
 
     val associationRules = frequentItemsets.flatMap { case (itemset, support) =>
       val subsets = itemset.subsets().toList.filter(_.nonEmpty)//.filter(_.size == itemset.size - 1)
@@ -29,22 +30,29 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
       }
     }
     // Filter rules based on confidence
-    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence).toList
+    associationRules.filter(_._2.nonEmpty).filter(_._3 >= minConfidence)
 
   }
 
   override def run() = {
     //TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)
 
+
     val transactionsRdd = (transactions)
 
     val setL_1 = phase1(transactionsRdd)  // returns a set with only minSupport entries
     val setL_2 = setL_1.union(phase2(transactionsRdd, 2, setL_1))
 
-    frequentItemsets = recursivePhase2(transactionsRdd, 3, setL_2).collect().toSet
-    associationRules = generateAssociationRules(frequentItemsets, minConfidence)
+    val frequentItemsets: RDD[(Set[String], Int)] = recursivePhase2(transactionsRdd, 3, setL_2)
+    val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(frequentItemsets, minConfidence)
 
-    printResults()
+    println("===Frequent Itemsets===")
+    frequentItemsets.collect().sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+
+    println("===Association Rules===")
+    associationRules.foreach { case (lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
 
   }
 }

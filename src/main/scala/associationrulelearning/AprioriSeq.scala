@@ -13,6 +13,21 @@ class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Se
 
   var generatedItemsets : Map[Set[String], Int] = Map()
 
+  var frequentItemsets: Set[(Set[String], Int)] = Set()
+  var associationRules: List[(Set[String], Set[String], Double)] = List()
+
+
+  def printResults(): Unit = {
+
+    println("===Frequent Itemsets===")
+    frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+
+    println("===Association Rules===")
+    associationRules.foreach { case (lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
+  }
+
 
   /**
    * Counts the occurences of the given itemset inside the dataset

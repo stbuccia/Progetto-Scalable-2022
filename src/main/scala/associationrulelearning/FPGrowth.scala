@@ -10,7 +10,7 @@ class FPGrowth(dataset: RDD[Set[String]]) extends Serializable with Apriori[RDD[
 
     def run(): Unit = {
 
-        //Convert RDD[Set[String]] in RDD[Array[String]]
+        // Convert RDD[Set[String]] in RDD[Array[String]]
         val transactionsRDD: RDD[Array[String]] = transactions.map(_.toArray)
 
         val fpg = new org.apache.spark.mllib.fpm.FPGrowth()
@@ -19,26 +19,20 @@ class FPGrowth(dataset: RDD[Set[String]]) extends Serializable with Apriori[RDD[
 
         val model = fpg.run(transactionsRDD)
 
-        //        model.freqItemsets.collect().foreach { itemset =>
-        //            println(itemset.items.mkString("[", ",", "]") + ", " + itemset.freq)
-        //        }
+        val frequentItemsets: RDD[(Set[String], Int)] = model.freqItemsets.map{itemset =>
+            (itemset.items.toSet, itemset.freq.toInt)}
 
-        model.freqItemsets.collect().foreach{itemset =>
-            val item = (itemset.items.toSet, itemset.freq.toInt)
-            frequentItemsets = frequentItemsets + item}
+        val associationRules: RDD[(Set[String], Set[String], Double)] = model.generateAssociationRules(minConfidence).map{rule =>
+            (rule.antecedent.toSet, rule.consequent.toSet, rule.confidence)}
 
-        //        model.generateAssociationRules(minConfidence).collect().foreach { rule =>
-        //            println(
-        //                rule.antecedent.mkString("[", ",", "]")
-        //                + " => " + rule.consequent .mkString("[", ",", "]")
-        //                + ", " + rule.confidence)
-        //        }
 
-        model.generateAssociationRules(minConfidence).collect().foreach{rule =>
-            associationRules = associationRules :+ (rule.antecedent.toSet, rule.consequent.toSet, rule.confidence)
+        println("===Frequent Itemsets===")
+        frequentItemsets.collect().sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+
+        println("===Association Rules===")
+        associationRules.foreach { case (lhs, rhs, confidence) =>
+            println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
         }
-
-        printResults()
     }
 }
 

@@ -8,18 +8,12 @@ lazy val root = (project in file("."))
   .settings(
     name := "association-rule-mining-earthquake-prediction",
     libraryDependencies ++= Seq(
-<<<<<<< HEAD
-      "org.apache.spark" %% "spark-core" % "3.2.1" ,
-      "org.apache.spark" %% "spark-sql" % "3.2.1" ,
-      "org.apache.spark" %% "spark-mllib" % "3.2.1"
-=======
       "org.apache.spark" %% "spark-core" % "3.2.2",
       "org.apache.spark" %% "spark-sql" % "3.2.2",
       "org.apache.spark" %% "spark-mllib" % "3.2.2"
       /*"org.apache.spark" %% "spark-core" % "3.2.1" % "provided",
       "org.apache.spark" %% "spark-sql" % "3.2.1" % "provided",
       "org.apache.spark" %% "spark-mllib" % "3.2.1" % "provided"*/
->>>>>>> main
     ),
     assembly / assemblyJarName := "armep.jar",
     assembly / assemblyMergeStrategy := {
