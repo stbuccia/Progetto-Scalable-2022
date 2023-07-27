@@ -7,9 +7,9 @@ import scala.util.control.Breaks.{break, breakable}
  * Class for sequential version of Apriori algorithm
  *
  */
-class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Seq[Set[String]]] {
+class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Seq[Set[String]]] {
 
-  override var transactions: Seq[Set[String]] = dataset.collect().toSeq
+  override var transactions: Seq[Set[String]] = dataset
   var minSupportCount: Int = (minSupport * transactions.length).toInt
 
   var generatedItemsets : Map[Set[String], Int] = Map()
@@ -84,11 +84,11 @@ class AprioriSeq(dataset: RDD[Set[String]]) extends Serializable with Apriori[Se
       }
     }
 
-    // Save frequent itemsets
     frequentItemsets = generatedItemsets.map{ case(k,v) => (k,v)}(collection.breakOut) : Set[(Set[String], Int)]
 
-    // Generate association rules
     generateAssociationRules()
+
+    printResults()
   }
 
 }

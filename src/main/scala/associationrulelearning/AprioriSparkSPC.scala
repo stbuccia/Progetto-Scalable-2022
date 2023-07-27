@@ -8,14 +8,10 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
 
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
-    println("Performing a recusive call to phase2 (k = " + k + ") of AprioriSPC..")
     val setL_k = phase2(transactionsRdd, k, setL)
-    println("Done! Found a new L dimensional set. Printing its contents..")
     if (setL_k.isEmpty()) {
-      println("No more recursive calls cause L set is empty")
       setL
     } else {
-      println("Going to check for another dimension cause L set is not empty yet")
       recursivePhase2(transactionsRdd, k + 1, setL.union(setL_k))
     }
   }
@@ -48,6 +44,8 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
 
     frequentItemsets = recursivePhase2(transactionsRdd, 3, setL_2).collect().toSet
     associationRules = generateAssociationRules(frequentItemsets, minConfidence)
+
+    printResults()
 
   }
 }

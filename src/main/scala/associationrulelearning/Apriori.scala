@@ -12,4 +12,15 @@ trait Apriori[T] {
   var associationRules: List[(Set[String], Set[String], Double)] = List()
 
   def run(): Any
+
+  def printResults(): Unit = {
+
+    println("===Frequent Itemsets===")
+    frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+
+    println("===Association Rules===")
+    associationRules.foreach { case (lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
+  }
 }

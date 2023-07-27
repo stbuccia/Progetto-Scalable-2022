@@ -12,29 +12,31 @@ object Main{
 
   // Spark UI: http://localhost:4040/jobs/
 
-  def time[R](label: String, block: => R): R = {
-    val t0 = System.nanoTime()
-    val result = block
-    val t1 = System.nanoTime()
-    println(s"$label - elapsed time: " + (t1 - t0) / 1000000 + "ms")
-    result
-  }
-
   def main(args: Array[String]): Unit = {
 
     // Check arguments
-    if (args.length != 3) {
+    if (args.length < 4) {
       println("Missing arguments!")
       System.exit(1)
     }
 
     val master = args(0)
     val datasetPath = args(1)
-    val outputFolder = args(2)
+    val simulation = if (args(2) == "sim=true") true else false
+    val outputFolder = args(3)
+
+    var classifier = ""
+
+    if (!simulation) {
+        classifier = args(4)
+    }
 
     println("Configuration:")
     println(s"- master: $master")
     println(s"- dataset path: $datasetPath")
+    if (!simulation) {
+        println(s"- classifier: $classifier")
+    }
     println(s"- output folder: $outputFolder")
 
 
@@ -61,14 +63,30 @@ object Main{
 
 
     // Run clustering and update data with cluster info
+
     val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
     val numClusters = 5
     val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", computeElbowMode = false)
 
     // Normalize data
+
     val normalizedData: RDD[(Int, Set[String])]= clusteredData.map(entry => (entry._1,labelConversion(entry._2)))
 
-    time("Apriori Sequential", runAprioriForEachCluster(numClusters, normalizedData))
+
+    if (simulation) {
+      time(s"[apriori sequential]", runAprioriForEachCluster(numClusters, normalizedData, "aprioriseq"))
+      time(s"[apriori single pass count]", runAprioriForEachCluster(numClusters, normalizedData, "apriorispc"))
+      time(s"[fpgrowth]", runAprioriForEachCluster(numClusters, normalizedData, "fpgrowth"))
+    } else {
+      classifier match {
+        case "aprioriseq" =>
+          time(s"[apriori sequential]", runAprioriForEachCluster(numClusters, normalizedData, "aprioriseq"))
+        case "apriorispc" =>
+          time(s"[apriori single pass count]", runAprioriForEachCluster(numClusters, normalizedData, "apriorispc"))
+        case "fpgrowth" =>
+          time(s"[fpgrowth]", runAprioriForEachCluster(numClusters, normalizedData, "fpgrowth"))
+      }
+    }
 
     sparkSession.stop()
 
@@ -77,36 +95,38 @@ object Main{
 
   }
 
-  private def runAprioriForEachCluster(numClusters: Int, dataset: RDD[(Int, Set[String])]): Unit = {
+   def runAprioriForEachCluster(numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): Unit = {
 
     // Run algorithm for each cluster
     for (clusterIndex <- 0 until numClusters) {
       println()
-      println(s"Computing cluster $clusterIndex...")
+      println(s"$model - computing cluster $clusterIndex...")
       val transactions: RDD[Set[String]] = dataset.filter(_._1 == clusterIndex).map(_._2)
 
-      // Run sequential naive algorithm
-      val alg = new AprioriSeq(transactions)
-      time("run Apriori Sequential", alg.run())
-
-      // Run Single Pass Count Apriori
-      //            val alg = new AprioriSparkSPC(transactions)
-      //            time("run Apriori SPC", alg.run())
-
-      // Run FPGrowth algorithm
-      //            val alg = new FPGrowth(transactions)
-      //            time("run FPGrowth", alg.run())
-
-
-      // Print results
-      println("===Frequent Itemsets===")
-      alg.frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
-      println("===Association Rules===")
-      alg.associationRules.foreach { case (lhs, rhs, confidence) =>
-        println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+      model match {
+        case "aprioriseq" =>
+          val collectedTransaction = transactions.collect().toSeq
+          val seqInstance = new AprioriSeq(collectedTransaction)
+          seqInstance.run()
+        case "apriorispc" =>
+          val spcInstance = new AprioriSparkSPC(transactions)
+          spcInstance.run()
+        case "fpgrowth" =>
+          val fpgrowthInstance = new FPGrowth(transactions)
+          fpgrowthInstance.run()
       }
     }
 
+  }
+
+
+  def time[R](label: String, block: => R): R = {
+    val t0 = System.nanoTime()
+    val result = block
+    val t1 = System.nanoTime()
+    println()
+    println(s"$label - elapsed time: " + (t1 - t0) / 1000000 + "ms")
+    result
   }
 
 }
