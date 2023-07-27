@@ -16,7 +16,6 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends AprioriSpark(dataset) {
     }
   }
 
-
   private def generateAssociationRules(frequentItemsets: Set[(Set[String], Int)], minConfidence: Double): List[(Set[String], Set[String], Double)] = {
 
     val frequentItemsetsList = frequentItemsets.toList

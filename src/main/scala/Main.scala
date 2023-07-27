@@ -1,14 +1,14 @@
 
-import associationrulelearning.{AprioriSeq, AprioriSparkSPC, FPGrowth}
+import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
+import org.apache.spark.HashPartitioner
+import org.apache.spark.Partitioner
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
 
-import scala.io.StdIn.readLine
 
-
-object Main{
+object Main {
 
   // Spark UI: http://localhost:4040/jobs/
 
@@ -28,14 +28,14 @@ object Main{
     var classifier = ""
 
     if (!simulation) {
-        classifier = args(4)
+      classifier = args(4)
     }
 
     println("Configuration:")
     println(s"- master: $master")
     println(s"- dataset path: $datasetPath")
     if (!simulation) {
-        println(s"- classifier: $classifier")
+      println(s"- classifier: $classifier")
     }
     println(s"- output folder: $outputFolder")
 
@@ -57,25 +57,26 @@ object Main{
     // Load dataset
 
     val datasetDF = sparkSession.read
-      .option("delimiter",",")
+      .option("delimiter", ",")
       .option("header", value = true)
       .csv(datasetPath)
 
 
     // Run clustering and update data with cluster info
 
-    val attributeForClustering = 3  // chose magnitude as dimension on which to perform clustering
+    val attributeForClustering = 3 // chose magnitude as dimension on which to perform clustering
     val numClusters = 5
     val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", computeElbowMode = false)
 
     // Normalize data
 
-    val normalizedData: RDD[(Int, Set[String])] = clusteredData.map(entry => (entry._1,labelConversion(entry._2)))
+    val normalizedData: RDD[(Int, Set[String])] = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))
 
 
     if (simulation) {
       time(s"[apriori sequential]", runAprioriForEachCluster(numClusters, normalizedData, "aprioriseq"))
       time(s"[apriori single pass count]", runAprioriForEachCluster(numClusters, normalizedData, "apriorispc"))
+      time(s"[apriori map reduce]", runAprioriForEachCluster(numClusters, normalizedData, "apriorimapreduce"))
       time(s"[fpgrowth]", runAprioriForEachCluster(numClusters, normalizedData, "fpgrowth"))
     } else {
       classifier match {
@@ -83,6 +84,8 @@ object Main{
           time(s"[apriori sequential]", runAprioriForEachCluster(numClusters, normalizedData, "aprioriseq"))
         case "apriorispc" =>
           time(s"[apriori single pass count]", runAprioriForEachCluster(numClusters, normalizedData, "apriorispc"))
+        case "apriorimapreduce" =>
+          time(s"[apriori map reduce]", runAprioriForEachCluster(numClusters, normalizedData, "apriorimapreduce"))
         case "fpgrowth" =>
           time(s"[fpgrowth]", runAprioriForEachCluster(numClusters, normalizedData, "fpgrowth"))
       }
@@ -91,11 +94,11 @@ object Main{
     sparkSession.stop()
 
     println("\nMain method completed")
-//    readLine()
-
   }
 
-   def runAprioriForEachCluster(numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): Unit = {
+
+
+  def runAprioriForEachCluster(numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): Unit = {
 
     // Run algorithm for each cluster
     for (clusterIndex <- 0 until numClusters) {
@@ -111,6 +114,9 @@ object Main{
         case "apriorispc" =>
           val spcInstance = new AprioriSparkSPC(transactions)
           spcInstance.run()
+        case "apriorimapreduce" =>
+          val mapreduceInstance = new AprioriMapReduce(transactions)
+          mapreduceInstance.run()
         case "fpgrowth" =>
           val fpgrowthInstance = new FPGrowth(transactions)
           fpgrowthInstance.run()
@@ -127,5 +133,4 @@ object Main{
     println(s"$label - elapsed time: " + (t1 - t0) / 1000000 + "ms")
     result
   }
-
 }

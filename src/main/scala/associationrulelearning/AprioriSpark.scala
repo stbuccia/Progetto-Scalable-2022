@@ -27,7 +27,8 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
     val setC_k = setL_strings.cartesian(setL_strings)
       .map(tuples => tuples._1 | tuples._2)
       .filter(_.size == k)
-      .distinct().collect()
+      .distinct()
+      .collect()
 
     val setL_k = transactionsRdd
       .flatMap(transaction =>
