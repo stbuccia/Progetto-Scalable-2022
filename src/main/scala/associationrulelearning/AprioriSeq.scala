@@ -1,6 +1,5 @@
 package associationrulelearning
 
-import org.apache.spark.rdd.RDD
 import scala.util.control.Breaks.{break, breakable}
 
 /**

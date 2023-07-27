@@ -40,6 +40,7 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
     setL_k
   }
 
+
   def candidateExistsInTransaction(candidate: Set[String], transaction: Set[String]): Boolean = {
     // all elements in candidate exist in transaction
     var result = true
@@ -49,7 +50,6 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
     }
     result
   }
-
 
 
   def run() = {
