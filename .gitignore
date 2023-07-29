@@ -4,8 +4,9 @@ cloud_exec/.metals
 .bsp
 .idea
 .idea/*
-project
+!project
 project/*
+!project/plugins.sbt
 src/project
 src/test
 src/main/scala/project
