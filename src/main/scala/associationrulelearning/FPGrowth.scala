@@ -8,7 +8,7 @@ class FPGrowth(dataset: RDD[Set[String]]) extends Serializable with Apriori[RDD[
     var transactions: RDD[Set[String]] = dataset
 
 
-    def run(): Unit = {
+    def run(): RDD[(Set[String], Set[String], Double)] = {
 
         // Convert RDD[Set[String]] in RDD[Array[String]]
         val transactionsRDD: RDD[Array[String]] = transactions.map(_.toArray)
@@ -33,6 +33,8 @@ class FPGrowth(dataset: RDD[Set[String]]) extends Serializable with Apriori[RDD[
         associationRules.foreach { case (lhs, rhs, confidence) =>
             println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
         }
+
+        associationRules
     }
 }
 

@@ -17,18 +17,6 @@ class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Se
   var associationRules: List[(Set[String], Set[String], Double)] = List()
 
 
-  def printResults(): Unit = {
-
-    println("===Frequent Itemsets===")
-    frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
-
-    println("===Association Rules===")
-    associationRules.foreach { case (lhs, rhs, confidence) =>
-      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
-    }
-  }
-
-
   /**
    * Counts the occurences of the given itemset inside the dataset
    * @param itemset set of items appearing inside the dataset
@@ -62,7 +50,7 @@ class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Se
   }
 
 
-  def run(): Unit = {
+  def run(): List[(Set[String], Set[String], Double)] = {
 
     // Initialize 1 dimensional frequent itemsets
     val singletonSet: Set[Set[String]] = itemSet.subsets().filter(_.size == 1).toSet
@@ -102,7 +90,15 @@ class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Se
 
     generateAssociationRules()
 
-    printResults()
+    println("===Frequent Itemsets===")
+    frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
+
+    println("===Association Rules===")
+    associationRules.foreach { case (lhs, rhs, confidence) =>
+      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
+    }
+
+    associationRules
   }
 
 }

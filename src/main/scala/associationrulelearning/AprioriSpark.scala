@@ -2,8 +2,13 @@ package associationrulelearning
 
 import org.apache.spark.rdd.RDD
 
-
-class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with Apriori[RDD[Set[String]]] {
+/**
+ * Class to be used as superclass for the three version of Apriori defined in the paper
+ * @param dataset
+ *
+ * todo: togliere abstract e implementare correttamente nel caso si realizzino anche gli altri due apriori
+ */
+abstract class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with Apriori[RDD[Set[String]]] {
 
   var transactions: RDD[Set[String]] = dataset
   var minSupportCount: Int = (minSupport * transactions.count()).toInt
@@ -54,7 +59,7 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
   }
 
 
-  def run() = {
+  //def run() = {
     /*
     //TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)
     val conf = new SparkConf().setAppName("apriori-sequential").setMaster("local[2]")
@@ -67,5 +72,6 @@ class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializable with 
     val out = phase2(transactionsRdd, 2, setL_1)
     out.collect().foreach(println)
     */
-  }
+
+  //}
 }

@@ -8,7 +8,7 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
   var rdd_size: Double = transactions.count().toDouble
 
 
-  override def run(): Unit = {
+  override def run(): RDD[(Set[String], Set[String], Double)] = {
 
 
     val rdd_itemsets_1 = countItemsetsSize1(transactions, rdd_size, minSupport)
@@ -37,6 +37,8 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
     associationRules.foreach { case (lhs, rhs, confidence) =>
       println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
     }
+
+    associationRules
   }
 
 

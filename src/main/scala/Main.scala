@@ -2,8 +2,7 @@
 import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
-import org.apache.spark.HashPartitioner
-import org.apache.spark.Partitioner
+import org.apache.spark.{HashPartitioner, Partitioner, SparkContext}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.rdd.RDD
 
@@ -45,7 +44,6 @@ object Main {
     println("Started")
 
     val appName = "AssociationRuleLearning.Apriori"
-    //val master = "local" // or "local[2]"
     val sparkSession = SparkSession.builder()
       .appName(appName)
       .master(master)
@@ -74,20 +72,33 @@ object Main {
 
 
     if (simulation) {
-      time(s"[apriori sequential]", runAprioriForEachCluster(numClusters, normalizedData, "aprioriseq"))
-      time(s"[apriori single pass count]", runAprioriForEachCluster(numClusters, normalizedData, "apriorispc"))
-      time(s"[apriori map reduce]", runAprioriForEachCluster(numClusters, normalizedData, "apriorimapreduce"))
-      time(s"[fpgrowth]", runAprioriForEachCluster(numClusters, normalizedData, "fpgrowth"))
+      val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
+      println("generated association rules are: ")
+      aprioriSeqRules.foreach(rule => rule.collect().foreach(println))
+      //aprioriSeqRules.foreach(println)
+      val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
+      println("generated association rules are: ")
+      aprioriSpcRules.foreach(rule => rule.collect().foreach(println))
+      //aprioriSpcRules.foreach(println)
+      val aprioriMapRedRules = time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
+      println("generated association rules are: ")
+      aprioriMapRedRules.foreach(rule => rule.collect().foreach(println))
+      //aprioriMapRedRules.foreach(println)
+      time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
+
+      val res = aprioriMapRedRules.union(aprioriSpcRules).union(aprioriMapRedRules)
+      res.foreach(rule => rule.collect().foreach(println))
     } else {
       classifier match {
         case "aprioriseq" =>
-          time(s"[apriori sequential]", runAprioriForEachCluster(numClusters, normalizedData, "aprioriseq"))
+          val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
+          //aprioriSeqRules.foreach(el => el.collect().foreach(println))
         case "apriorispc" =>
-          time(s"[apriori single pass count]", runAprioriForEachCluster(numClusters, normalizedData, "apriorispc"))
+          time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
         case "apriorimapreduce" =>
-          time(s"[apriori map reduce]", runAprioriForEachCluster(numClusters, normalizedData, "apriorimapreduce"))
+          time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
         case "fpgrowth" =>
-          time(s"[fpgrowth]", runAprioriForEachCluster(numClusters, normalizedData, "fpgrowth"))
+          time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
       }
     }
 
@@ -98,7 +109,9 @@ object Main {
 
 
 
-  def runAprioriForEachCluster(numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): Unit = {
+  def runAprioriForEachCluster(sc: SparkContext, numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): List[RDD[(Set[String], Set[String], Double)]] = {
+
+    var associationRules: List[RDD[(Set[String], Set[String], Double)]] = List()
 
     // Run algorithm for each cluster
     for (clusterIndex <- 0 until numClusters) {
@@ -110,18 +123,21 @@ object Main {
         case "aprioriseq" =>
           val collectedTransaction = transactions.collect().toSeq
           val seqInstance = new AprioriSeq(collectedTransaction)
-          seqInstance.run()
+          associationRules = associationRules :+ sc.parallelize(seqInstance.run())
+          //val assRulesSubset = seqInstance.run()
         case "apriorispc" =>
           val spcInstance = new AprioriSparkSPC(transactions)
-          spcInstance.run()
+          associationRules = associationRules :+ spcInstance.run()
         case "apriorimapreduce" =>
           val mapreduceInstance = new AprioriMapReduce(transactions)
-          mapreduceInstance.run()
+          associationRules = associationRules :+ mapreduceInstance.run()
         case "fpgrowth" =>
           val fpgrowthInstance = new FPGrowth(transactions)
-          fpgrowthInstance.run()
+          associationRules = associationRules :+ fpgrowthInstance.run()
       }
     }
+
+    associationRules
   }
 
 
