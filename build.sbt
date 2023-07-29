@@ -15,12 +15,16 @@ lazy val root = (project in file("."))
       "org.apache.spark" %% "spark-sql" % "3.2.1" % "provided",
       "org.apache.spark" %% "spark-mllib" % "3.2.1" % "provided"*/
     ),
+
     assembly / assemblyJarName := "armep.jar",
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", xs@_*) => MergeStrategy.discard
       case x => MergeStrategy.first
     },
+
     artifactName := {(sv: ScalaVersion, module: ModuleID, artifact: Artifact) => "armep.jar"}
+
+
   )
 
 
