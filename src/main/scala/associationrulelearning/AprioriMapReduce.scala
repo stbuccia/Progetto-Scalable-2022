@@ -34,7 +34,7 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
     frequentItemsets.collect().sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
 
     println("===Association Rules===")
-    associationRules.foreach { case (lhs, rhs, confidence) =>
+    associationRules.sortBy(_._3).foreach { case (lhs, rhs, confidence) =>
       println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
     }
 

@@ -63,7 +63,6 @@ class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Se
     var k = 2
     breakable {
       while (true) {
-        println("Searching for " + k + " dimensional frequent itemsets")
 
         // Creating a set of all the possible subsets of dimension k
         val joinSet = itemSet.subsets(k).toSet
@@ -94,7 +93,7 @@ class AprioriSeq(dataset: Seq[Set[String]]) extends Serializable with Apriori[Se
     frequentItemsets.toArray.sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
 
     println("===Association Rules===")
-    associationRules.foreach { case (lhs, rhs, confidence) =>
+    associationRules.sortBy(_._3).foreach { case (lhs, rhs, confidence) =>
       println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
     }
 
