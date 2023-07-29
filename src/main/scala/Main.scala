@@ -74,33 +74,52 @@ object Main {
     if (simulation) {
       val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
       println("generated association rules are: ")
-      aprioriSeqRules.foreach(rule => rule.collect().foreach(println))
+      val aprioriSeqRes = aprioriSeqRules.reduceLeft((a,b) => a.union(b).distinct())
+      aprioriSeqRes.sortBy(_._3).collect().foreach(println)
+      writeAssociationRulesToCSV(sparkSession, aprioriSeqRes, outputFolder + "/AssociationRules/AprioriSeq")
 
-      //aprioriSeqRules.foreach(println)
+
       val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
       println("generated association rules are: ")
-      aprioriSpcRules.foreach(rule => rule.collect().foreach(println))
-      //aprioriSpcRules.foreach(println)
+      val aprioriSpcRes = aprioriSpcRules.reduceLeft((a,b) => a.union(b).distinct())
+      aprioriSpcRes.sortBy(_._3).collect().foreach(println)
+      writeAssociationRulesToCSV(sparkSession, aprioriSpcRes, outputFolder + "/AssociationRules/AprioriSPC")
+
       val aprioriMapRedRules = time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
       println("generated association rules are: ")
-      aprioriMapRedRules.foreach(rule => rule.collect().foreach(println))
-      //aprioriMapRedRules.foreach(println)
-      time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
+      val aprioriMapRedRes = aprioriMapRedRules.reduceLeft((a,b) => a.union(b).distinct())
+      aprioriMapRedRes.sortBy(_._3).collect().foreach(println)
+      writeAssociationRulesToCSV(sparkSession, aprioriMapRedRes, outputFolder + "/AssociationRules/AprioriMapRed")
 
-      val res = aprioriMapRedRules.union(aprioriSpcRules).union(aprioriMapRedRules)
-      res.foreach(rule => rule.collect().foreach(println))
-      writeAssociationRulesToCSV(sparkSession, res, outputFolder)
+      val fpgrowthRules = time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
+      println("generated association rules are: ")
+      val fpgrowthRes = fpgrowthRules.reduceLeft((a,b) => a.union(b).distinct())
+      fpgrowthRes.sortBy(_._3).collect().foreach(println)
+      writeAssociationRulesToCSV(sparkSession, fpgrowthRes, outputFolder + "/AssociationRules/FPGrowth")
+
+
     } else {
       classifier match {
         case "aprioriseq" =>
           val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
-          //aprioriSeqRules.foreach(el => el.collect().foreach(println))
+          println("generated association rules are: ")
+          val aprioriSeqRes = aprioriSeqRules.reduceLeft((a,b) => a.union(b).distinct())
+          aprioriSeqRes.sortBy(_._3).collect().foreach(println)
         case "apriorispc" =>
-          time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
+          val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
+          println("generated association rules are: ")
+          val aprioriSpcRes = aprioriSpcRules.reduceLeft((a,b) => a.union(b).distinct())
+          aprioriSpcRes.sortBy(_._3).collect().foreach(println)
         case "apriorimapreduce" =>
-          time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
+          val aprioriMapRedRules = time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
+          println("generated association rules are: ")
+          val aprioriMapRedRes = aprioriMapRedRules.reduceLeft((a,b) => a.union(b).distinct())
+          aprioriMapRedRes.sortBy(_._3).collect().foreach(println)
         case "fpgrowth" =>
-          time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
+          val fpgrowthRules = time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
+          println("generated association rules are: ")
+          val fpgrowthRes = fpgrowthRules.reduceLeft((a,b) => a.union(b).distinct())
+          fpgrowthRes.sortBy(_._3).collect().foreach(println)
       }
     }
 
@@ -109,23 +128,19 @@ object Main {
     println("\nMain method completed")
   }
 
-  def writeAssociationRulesToCSV(sparkSession: SparkSession, associationRules: List[RDD[(Set[String], Set[String], Double)]], outputFolder: String) : Unit = {
+  def writeAssociationRulesToCSV(sparkSession: SparkSession, rules: RDD[(Set[String], Set[String], Double)], outputFolder: String) : Unit = {
 
-    associationRules.map {
-      (rules) => {
-        val associationRulesRDD = rules.map {
-          case (lhs, rhs, confidence) => (lhs.mkString(", "), rhs.mkString(", "), confidence)
-        }
-
-        sparkSession.createDataFrame(associationRulesRDD)
-        .toDF("antecedent", "consequent", "confidence")
-        .coalesce(1)
-        .write
-        .option("header", value = true)
-        .mode("overwrite")
-        .csv(outputFolder + "/associationRules")
-      }
+    val associationRules = rules.map {
+      case (lhs, rhs, confidence) => (lhs.mkString(", "), rhs.mkString(", "), confidence)
     }
+
+    sparkSession.createDataFrame(associationRules)
+    .toDF("antecedent", "consequent", "confidence")
+    .coalesce(1)
+    .write
+    .option("header", value = true)
+    .mode("overwrite")
+    .csv(outputFolder)
   }
 
   def runAprioriForEachCluster(sc: SparkContext, numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): List[RDD[(Set[String], Set[String], Double)]] = {
