@@ -56,6 +56,9 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends java.io.Serializable wi
 
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
+    if (k > 4)
+      return setL
+
     val setL_k = phase2(transactionsRdd, k, setL)
     if (setL_k.isEmpty()) {
       setL

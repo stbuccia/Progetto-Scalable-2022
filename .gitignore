@@ -1,4 +1,5 @@
 .metals
+cloud_exec/.metals
 .bloop
 .bsp
 .idea
@@ -9,5 +10,6 @@ project/*
 src/project
 src/test
 src/main/scala/project
+src/main/resources/AssociationRules
 target
 target/*
