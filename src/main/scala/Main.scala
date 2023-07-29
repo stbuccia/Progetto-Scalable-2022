@@ -75,6 +75,7 @@ object Main {
       val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
       println("generated association rules are: ")
       aprioriSeqRules.foreach(rule => rule.collect().foreach(println))
+
       //aprioriSeqRules.foreach(println)
       val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
       println("generated association rules are: ")
@@ -88,6 +89,7 @@ object Main {
 
       val res = aprioriMapRedRules.union(aprioriSpcRules).union(aprioriMapRedRules)
       res.foreach(rule => rule.collect().foreach(println))
+      writeAssociationRulesToCSV(sparkSession, res, outputFolder)
     } else {
       classifier match {
         case "aprioriseq" =>
@@ -107,7 +109,24 @@ object Main {
     println("\nMain method completed")
   }
 
+  def writeAssociationRulesToCSV(sparkSession: SparkSession, associationRules: List[RDD[(Set[String], Set[String], Double)]], outputFolder: String) : Unit = {
 
+    associationRules.map {
+      (rules) => {
+        val associationRulesRDD = rules.map {
+          case (lhs, rhs, confidence) => (lhs.mkString(", "), rhs.mkString(", "), confidence)
+        }
+
+        sparkSession.createDataFrame(associationRulesRDD)
+        .toDF("antecedent", "consequent", "confidence")
+        .coalesce(1)
+        .write
+        .option("header", value = true)
+        .mode("overwrite")
+        .csv(outputFolder + "/associationRules")
+      }
+    }
+  }
 
   def runAprioriForEachCluster(sc: SparkContext, numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): List[RDD[(Set[String], Set[String], Double)]] = {
 

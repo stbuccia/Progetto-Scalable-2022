@@ -1,4 +1,5 @@
 .metals
+cloud_exec/.metals
 .bloop
 .bsp
 .idea

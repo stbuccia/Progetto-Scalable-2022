@@ -102,6 +102,5 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends java.io.Serializable wi
     }
 
     associationRules
-
   }
 }
