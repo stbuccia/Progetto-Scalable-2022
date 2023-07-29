@@ -74,10 +74,18 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
     output
   }
 
+
   def generateItemsetsSizeN(itemset: Set[String], labelSet: Set[String]) = {
-    labelSet
-      .filter(x => !itemset.contains(x))
-      .map(x => itemset + x)
+      var output = labelSet
+      for (item <- itemset) {
+        item match {
+          case "NH" | "SH" => output = output -- Set("NH", "SH")
+          case "Q1" | "Q2" | "Q3" | "Q4" => output = output -- Set("Q1", "Q2", "Q3", "Q4")
+          case "LOW_MAG" | "MED_MAG" | "HIGH_MAG" => output = output -- Set("LOW_MAG", "MED_MAG", "HIGH_MAG")
+          case "LOW_DEPTH" | "MED_DEPTH" | "HIGH_DEPTH" => output = output -- Set("LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
+        }
+      }
+      output.map(x => itemset + x)
   }
 
 

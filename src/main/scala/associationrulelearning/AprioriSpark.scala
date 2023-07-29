@@ -27,24 +27,31 @@ abstract class AprioriSpark(dataset: RDD[Set[String]]) extends java.io.Serializa
 
 
   protected def phase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
-
     val setL_strings = setL.map(_._1)
-
-    val setC_k = setL_strings.cartesian(setL_strings)
-      .map(tuples => tuples._1 | tuples._2)
-      .filter(_.size == k)
-      .distinct()
-      .collect()
-
+    val setC_k = setL.flatMap(pair => generateItemsetsSizeN(pair._1)).distinct().collect()
     val setL_k = transactionsRdd
       .flatMap(transaction =>
         setC_k.filter(itemsetC => itemsetC.subsetOf(transaction))
-          .map(itemsetC => (itemsetC,1))
+          .map(itemsetC => (itemsetC, 1))
       )
       .reduceByKey((x, y) => x + y)
-      .filter(item => item._2 > minSupportCount)
+      .filter(item => item._2 > minSupport)
 
     setL_k
+  }
+
+  def generateItemsetsSizeN(candidateItemset: Set[String]) = {
+    //val labelSet : Set[String] = Set("SH", "NH", "Q1", "Q2", "Q3", "Q4", "LOW_MAG", "MED_MAG", "HIGH_MAG", "LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
+    var output: Set[String] = itemSet
+    for (item <- candidateItemset) {
+      item match {
+        case "NH" | "SH" => output = output -- Set("NH", "SH")
+        case "Q1" | "Q2" | "Q3" | "Q4" => output = output -- Set("Q1", "Q2", "Q3", "Q4")
+        case "LOW_MAG" | "MED_MAG" | "HIGH_MAG" => output = output -- Set("LOW_MAG", "MED_MAG", "HIGH_MAG")
+        case "LOW_DEPTH" | "MED_DEPTH" | "HIGH_DEPTH" => output = output -- Set("LOW_DEPTH", "MED_DEPTH", "HIGH_DEPTH")
+      }
+    }
+    output.map(x => candidateItemset + x)
   }
 
 
