@@ -76,26 +76,25 @@ object Main {
       val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
       println("generated association rules are: ")
       val aprioriSeqRes = aprioriSeqRules.reduceLeft((a,b) => a.union(b).distinct())
-      aprioriSeqRes.sortBy(_._3).collect().foreach(println)
+      //aprioriSeqRes.sortBy(_._3).collect().foreach(println)
       writeAssociationRulesToCSV(sparkSession, verify(aprioriSeqRes, normalizedData), outputFolder + "/AssociationRules/AprioriSeq")
-
-
+      
       val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
       println("generated association rules are: ")
       val aprioriSpcRes = aprioriSpcRules.reduceLeft((a,b) => a.union(b).distinct())
-      aprioriSpcRes.sortBy(_._3).collect().foreach(println)
+      //aprioriSpcRes.sortBy(_._3).collect().foreach(println)
       writeAssociationRulesToCSV(sparkSession, aprioriSpcRes, outputFolder + "/AssociationRules/AprioriSPC")
 
       val aprioriMapRedRules = time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
       println("generated association rules are: ")
       val aprioriMapRedRes = aprioriMapRedRules.reduceLeft((a,b) => a.union(b).distinct())
-      aprioriMapRedRes.sortBy(_._3).collect().foreach(println)
+      //aprioriMapRedRes.sortBy(_._3).collect().foreach(println)
       writeAssociationRulesToCSV(sparkSession, aprioriMapRedRes, outputFolder + "/AssociationRules/AprioriMapRed")
 
       val fpgrowthRules = time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
       println("generated association rules are: ")
       val fpgrowthRes = fpgrowthRules.reduceLeft((a,b) => a.union(b).distinct())
-      fpgrowthRes.sortBy(_._3).collect().foreach(println)
+      //fpgrowthRes.sortBy(_._3).collect().foreach(println)
       writeAssociationRulesToCSV(sparkSession, fpgrowthRes, outputFolder + "/AssociationRules/FPGrowth")
 
 
@@ -105,22 +104,26 @@ object Main {
           val aprioriSeqRules = time(s"[apriori sequential]", runAprioriForEachCluster(sc, numClusters, normalizedData, "aprioriseq"))
           println("generated association rules are: ")
           val aprioriSeqRes = aprioriSeqRules.reduceLeft((a,b) => a.union(b).distinct())
-          aprioriSeqRes.sortBy(_._3).collect().foreach(println)
+          //aprioriSeqRes.sortBy(_._3).collect().foreach(println)
+          writeAssociationRulesToCSV(sparkSession, aprioriSeqRes, outputFolder + "/AssociationRules/AprioriSeq")
         case "apriorispc" =>
           val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
           println("generated association rules are: ")
           val aprioriSpcRes = aprioriSpcRules.reduceLeft((a,b) => a.union(b).distinct())
-          aprioriSpcRes.sortBy(_._3).collect().foreach(println)
+          //aprioriSpcRes.sortBy(_._3).collect().foreach(println)
+          writeAssociationRulesToCSV(sparkSession, aprioriSpcRes, outputFolder + "/AssociationRules/AprioriSPC")
         case "apriorimapreduce" =>
           val aprioriMapRedRules = time(s"[apriori map reduce]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorimapreduce"))
           println("generated association rules are: ")
           val aprioriMapRedRes = aprioriMapRedRules.reduceLeft((a,b) => a.union(b).distinct())
-          aprioriMapRedRes.sortBy(_._3).collect().foreach(println)
+          //aprioriMapRedRes.sortBy(_._3).collect().foreach(println)
+          writeAssociationRulesToCSV(sparkSession, aprioriMapRedRes, outputFolder + "/AssociationRules/AprioriMapRed")
         case "fpgrowth" =>
           val fpgrowthRules = time(s"[fpgrowth]", runAprioriForEachCluster(sc, numClusters, normalizedData, "fpgrowth"))
           println("generated association rules are: ")
           val fpgrowthRes = fpgrowthRules.reduceLeft((a,b) => a.union(b).distinct())
-          fpgrowthRes.sortBy(_._3).collect().foreach(println)
+          //fpgrowthRes.sortBy(_._3).collect().foreach(println)
+          writeAssociationRulesToCSV(sparkSession, fpgrowthRes, outputFolder + "/AssociationRules/FPGrowth")
       }
     }
 
