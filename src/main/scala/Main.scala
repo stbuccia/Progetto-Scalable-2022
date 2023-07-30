@@ -1,5 +1,6 @@
 
-import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth}
+import associationrulelearning.VerifyAssociationRules.verify
+import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth, VerifyAssociationRules}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
 import org.apache.spark.{HashPartitioner, Partitioner, SparkContext}
@@ -76,7 +77,7 @@ object Main {
       println("generated association rules are: ")
       val aprioriSeqRes = aprioriSeqRules.reduceLeft((a,b) => a.union(b).distinct())
       aprioriSeqRes.sortBy(_._3).collect().foreach(println)
-      writeAssociationRulesToCSV(sparkSession, aprioriSeqRes, outputFolder + "/AssociationRules/AprioriSeq")
+      writeAssociationRulesToCSV(sparkSession, verify(aprioriSeqRes, normalizedData), outputFolder + "/AssociationRules/AprioriSeq")
 
 
       val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
@@ -128,6 +129,7 @@ object Main {
     println("\nMain method completed")
   }
 
+
   def writeAssociationRulesToCSV(sparkSession: SparkSession, rules: RDD[(Set[String], Set[String], Double)], outputFolder: String) : Unit = {
 
     val associationRules = rules.map {
@@ -142,6 +144,7 @@ object Main {
     .mode("overwrite")
     .csv(outputFolder)
   }
+
 
   def runAprioriForEachCluster(sc: SparkContext, numClusters: Int, dataset: RDD[(Int, Set[String])], model: String): List[RDD[(Set[String], Set[String], Double)]] = {
 

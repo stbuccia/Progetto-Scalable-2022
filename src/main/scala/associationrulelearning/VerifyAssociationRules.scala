@@ -10,20 +10,61 @@ object VerifyAssociationRules {
    * @param dataset all transaction where to test for accuracy
    * @return  the set of rules together with their accuracy
    */
-  def verify(rules: RDD[(Set[String], Set[String])], dataset: RDD[Set[String]]): RDD[(Set[String], Set[String], Double)] = {
+  def verify(rules: RDD[(Set[String], Set[String], Double)], dataset: RDD[(Int, Set[String])]): RDD[(Set[String], Set[String], Double)] = {
 
-    rules.map(rule => (rule._1, rule._2, generateAccuracy(rule, dataset)))
+    // Count occurences of all (AUB), where A => B is a rule from rules RDD
 
+    val unionRulesList = rules.map(rule => (rule._1.union(rule._2), 0)).collect()
+
+    val unionRulesWithSupport = dataset
+      .flatMap(transaction =>
+        unionRulesList.filter(rule => rule._1.subsetOf(transaction._2))
+          .map(rule => (rule._1, 1))
+      )
+      .reduceByKey((x, y) => x + y)
+      .collect()
+
+    println(s"Union rules together with support are:")
+    unionRulesWithSupport.foreach(println)
+
+    // Count occurences of all (A), where A => B is a rule from rules RDD
+
+    val antecedentRulesList = rules.map(rule => (rule._1, 0)).collect()
+
+    val antecedentRulesWithSupport = dataset
+      .flatMap(transaction =>
+        antecedentRulesList.filter(rule => rule._1.subsetOf(transaction._2))
+          .map(rule => (rule._1, 1))
+      )
+      .reduceByKey((x, y) => x + y)
+      .collect()
+
+    println(s"Antecedent rules together with support are:")
+    antecedentRulesWithSupport.foreach(println)
+
+    // Return rules list together with accuracy
+
+    rules.map{ rule =>
+      val unionSupport = unionRulesWithSupport
+        .filter(_._1 == rule._1.union(rule._2))
+        .map(_._2)
+        .head
+      val antecedentSupport = antecedentRulesWithSupport
+        .filter(_._1 == rule._1)
+        .map(_._2)
+        .head
+      (rule._1, rule._2, unionSupport.toDouble / antecedentSupport.toDouble)
+    }
   }
 
-  def generateAccuracy(rule:(Set[String], Set[String]), dataset: RDD[Set[String]]): Double = {
-
-    val union = rule._1.union(rule._2)
-
-    dataset.filter(transaction => union.subsetOf(transaction)).count().toDouble /
-      dataset.filter(transaction => rule._1.subsetOf(transaction)).count().toDouble
-
-  }
+//  def generateAccuracy(rule:(Set[String], Set[String], Double), dataset: RDD[(Int, Set[String])]): Double = {
+//
+//    val union = rule._1.union(rule._2)
+//
+//    dataset.filter(transaction => union.subsetOf(transaction._2)).count().toDouble /
+//      dataset.filter(transaction => rule._1.subsetOf(transaction._2)).count().toDouble
+//
+//  }
 
 //  def verify(rulesPath: String, datasetPath: String): Unit = {
 //
@@ -57,50 +98,47 @@ object VerifyAssociationRules {
 //      )
 //    )
 //    result.map(x => printAssociationRules(x, dataset_size))
-
-
-
-  }
-
-  def readCSV(sc: SparkContext, path: String) = {
-    val rdd = sc.textFile(path)
-      .map(x => x.split(","))
-      .map(_.toSet)
-    println("   - Read " + rdd.count() + " lines")
-    rdd
-  }
-
-
-  def readAssociationRules(sc: SparkContext, path: String) = {
-    val rdd = sc.textFile(path)
-      .map(x => x.split(","))
-      .map(x =>
-        (
-          x(0).split("&").toSet,
-          x(1).split("&").toSet,
-          x(2).toDouble
-        )
-      )
-      //.collect()
-
-    println("   - Read " + rdd.count() + " lines")
-    rdd
-  }
-
-
-  def printAssociationRules(rule: ((Set[String], Set[String], Double), Long), dataset_size: Long) = {
-    println("\n    - Rule: " + rule._1._1.mkString(",")
-      + " --> " + rule._1._2.mkString(",")
-      + "\n    conf: " + rule._1._3
-      + "  occ: " + rule._2 + "/" + dataset_size + "   " + (rule._2/dataset_size.toDouble*100) )
-  }
-
-
-  def time[R](block: => R): R = {
-    val t0 = System.nanoTime()
-    val result = block // call-by-name
-    val t1 = System.nanoTime()
-    println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
-    result
-  }
+//  }
+//
+//  def readCSV(sc: SparkContext, path: String) = {
+//    val rdd = sc.textFile(path)
+//      .map(x => x.split(","))
+//      .map(_.toSet)
+//    println("   - Read " + rdd.count() + " lines")
+//    rdd
+//  }
+//
+//
+//  def readAssociationRules(sc: SparkContext, path: String) = {
+//    val rdd = sc.textFile(path)
+//      .map(x => x.split(","))
+//      .map(x =>
+//        (
+//          x(0).split("&").toSet,
+//          x(1).split("&").toSet,
+//          x(2).toDouble
+//        )
+//      )
+//      //.collect()
+//
+//    println("   - Read " + rdd.count() + " lines")
+//    rdd
+//  }
+//
+//
+//  def printAssociationRules(rule: ((Set[String], Set[String], Double), Long), dataset_size: Long) = {
+//    println("\n    - Rule: " + rule._1._1.mkString(",")
+//      + " --> " + rule._1._2.mkString(",")
+//      + "\n    conf: " + rule._1._3
+//      + "  occ: " + rule._2 + "/" + dataset_size + "   " + (rule._2/dataset_size.toDouble*100) )
+//  }
+//
+//
+//  def time[R](block: => R): R = {
+//    val t0 = System.nanoTime()
+//    val result = block // call-by-name
+//    val t1 = System.nanoTime()
+//    println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+//    result
+//  }
 }
