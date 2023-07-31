@@ -13,5 +13,6 @@ src/project
 src/test
 src/main/scala/project
 src/main/resources/AssociationRules
+src/main/resources/Times
 target
 target/*
