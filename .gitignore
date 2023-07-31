@@ -4,6 +4,8 @@ cloud_exec/.metals
 .bsp
 .idea
 .idea/*
+output/
+output/*
 !project
 project/*
 !project/plugins.sbt
