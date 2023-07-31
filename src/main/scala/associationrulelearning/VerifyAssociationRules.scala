@@ -10,6 +10,7 @@ object VerifyAssociationRules {
    * @param dataset all transaction where to test for accuracy
    * @return  the set of rules together with their accuracy
    */
+    /*
   def verify(rules: RDD[(Set[String], Set[String], Double)], dataset: RDD[(Int, Set[String])]): RDD[(Set[String], Set[String], Double)] = {
 
 
@@ -66,6 +67,30 @@ object VerifyAssociationRules {
         .head
       (rule._1, rule._2, unionSupport / antecedentSupport)
     }
+  }
+*/
+  def verify(rules: RDD[(Set[String], Set[String], Double)], dataset: RDD[(Int, Set[String])]): RDD[(Set[String], Set[String], Double)] = {
+
+    val rddSet: Array[Set[String]] = rules.flatMap(rule => Set(rule._1.union(rule._2), rule._1)).distinct().collect()
+
+    val mappaSupport = dataset.flatMap(transaction =>
+      rddSet.filter(s => s.subsetOf(transaction._2)).map(s => (s,1)))
+      .reduceByKey((x, y) => x + y)
+      .collectAsMap()
+
+    // SOLO PER TEST ----------------------------------------------------
+    val ruleTest = rules.take(1)(0)
+    val supAnt = dataset.filter(transaction => ruleTest._1.subsetOf(transaction._2)).count().toDouble
+    val supUn = dataset.filter(transaction => ruleTest._1.union(ruleTest._2).subsetOf(transaction._2)).count().toDouble
+    println("TEST ------ "+ruleTest +"     "+ (supUn/supAnt))
+    //----------------------------------------------------
+
+
+    rules.map(rule => {
+      val supUnion: Double = mappaSupport(rule._1.union(rule._2))
+      val supAnt: Double = mappaSupport(rule._1)
+      (rule._1, rule._2, supUnion/supAnt)
+    })
   }
 
 }

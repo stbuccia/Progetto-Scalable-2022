@@ -10,11 +10,9 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
 
   override def run(): RDD[(Set[String], Set[String], Double)] = {
 
+    var rdd_itemsets = countItemsetsSize1(transactions, rdd_size, minSupport)
 
-    val rdd_itemsets_1 = countItemsetsSize1(transactions, rdd_size, minSupport)
-    var rdd_itemsets = generateAndCountItemset(transactions, rdd_itemsets_1, itemSet, rdd_size, minSupport, 2)
-
-    var i = 3
+    var i = 2
     var stop = false
     while (i < 5 && !stop) {
       val rdd_itemsets_N = generateAndCountItemset(transactions, rdd_itemsets.filter(_._1.size == i - 1), itemSet, rdd_size, minSupport, i)
@@ -43,15 +41,10 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
 
 
   def countItemsetsSize1(rdd: RDD[Set[String]], rdd_size: Double, min_sup: Double) = {
-    //println("\nGenerate itemsets with size 1...")
-    val output = rdd
+    rdd
       .flatMap(x => x.map(y => (Set(y), 1)))
       .reduceByKey((x, y) => x + y)
-      //TODO questa count() è necessaria? si, perchè viene passato come parametro a tutte le fasi, lo calcolo solo una volta
       .filter(x => (x._2.toDouble / rdd_size) >= min_sup)
-    //.collect()
-    //printItemsets(output, rdd_size)
-    output
   }
 
 
