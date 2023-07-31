@@ -78,7 +78,7 @@ object Main {
       val aprioriSeqRes = aprioriSeqRules.reduceLeft((a,b) => a.union(b).distinct())
       //aprioriSeqRes.sortBy(_._3).collect().foreach(println)
       writeAssociationRulesToCSV(sparkSession, verify(aprioriSeqRes, normalizedData), outputFolder + "/AssociationRules/AprioriSeq")
-      
+
       val aprioriSpcRules = time(s"[apriori single pass count]", runAprioriForEachCluster(sc, numClusters, normalizedData, "apriorispc"))
       println("generated association rules are: ")
       val aprioriSpcRes = aprioriSpcRules.reduceLeft((a,b) => a.union(b).distinct())

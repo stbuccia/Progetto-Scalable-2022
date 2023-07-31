@@ -14,31 +14,47 @@ object VerifyAssociationRules {
 
     // Count occurences of all (AUB), where A => B is a rule from rules RDD
 
-    val unionRulesList = rules.map(rule => (rule._1.union(rule._2), 0)).collect()
+    val unionRulesList = rules.map(rule => rule._1.union(rule._2)).collect()
 
-    val unionRulesWithSupport = dataset
-      .flatMap(transaction =>
-        unionRulesList.filter(rule => rule._1.subsetOf(transaction._2))
-          .map(rule => (rule._1, 1))
-      )
-      .reduceByKey((x, y) => x + y)
-      .collect()
+    val unionRulesWithSupport = unionRulesList.map{ rule =>
+      val support = dataset.filter(transaction => rule.subsetOf(transaction._2)).count().toDouble
+      (rule, support)
+    }
 
+//    val unionRulesList = rules.map(rule => (rule._1.union(rule._2), 0)).collect()
+//
+//    val unionRulesWithSupport = dataset
+//      .flatMap(transaction =>
+//        unionRulesList.filter(rule => rule._1.subsetOf(transaction._2))
+//          .map(rule => (rule._1, 1))
+//      )
+//      .reduceByKey((x, y) => x + y)
+//      .collect()
+
+    println()
     println(s"Union rules together with support are:")
     unionRulesWithSupport.foreach(println)
 
     // Count occurences of all (A), where A => B is a rule from rules RDD
 
-    val antecedentRulesList = rules.map(rule => (rule._1, 0)).collect()
+    val antecedentRulesList = rules.map(rule => rule._1).collect()
 
-    val antecedentRulesWithSupport = dataset
-      .flatMap(transaction =>
-        antecedentRulesList.filter(rule => rule._1.subsetOf(transaction._2))
-          .map(rule => (rule._1, 1))
-      )
-      .reduceByKey((x, y) => x + y)
-      .collect()
+    val antecedentRulesWithSupport = antecedentRulesList.map{ rule =>
+      val support = dataset.filter(transaction => rule.subsetOf(transaction._2)).count().toDouble
+      (rule, support)
+    }
 
+//    val antecedentRulesList = rules.map(rule => (rule._1, 0)).collect()
+//
+//    val antecedentRulesWithSupport = dataset
+//      .flatMap(transaction =>
+//        antecedentRulesList.filter(rule => rule._1.subsetOf(transaction._2))
+//          .map(rule => (rule._1, 1))
+//      )
+//      .reduceByKey((x, y) => x + y)
+//      .collect()
+
+    println()
     println(s"Antecedent rules together with support are:")
     antecedentRulesWithSupport.foreach(println)
 
@@ -53,7 +69,7 @@ object VerifyAssociationRules {
         .filter(_._1 == rule._1)
         .map(_._2)
         .head
-      (rule._1, rule._2, unionSupport.toDouble / antecedentSupport.toDouble)
+      (rule._1, rule._2, unionSupport / antecedentSupport)
     }
   }
 
