@@ -74,7 +74,7 @@ object Main {
     val algorithms = if (simulation) List("aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth") else List(classifier)
 
     val times = executeAlgorithms(algorithms, sparkSession, sc, numClusters, normalizedData, outputFolder)
-    writeTimesToCSV(sparkSession, times, master, datasetPath, outputFolder + "/Times")
+    writeTimesToCSV(sparkSession, times, master, datasetPath, outputFolder + "/times")
 
     sparkSession.stop()
 
@@ -86,7 +86,7 @@ object Main {
       case alg :: tail => {
         val (rules, time_elapsed) = time(alg, runAprioriForEachCluster(sc, numClusters, normalizedData, alg))
         val res = rules.reduceLeft((a,b) => a.union(b).distinct())
-        writeAssociationRulesToCSV(sparkSession, verify(res, normalizedData), outputFolder + "/AssociationRules/" + alg)
+        writeAssociationRulesToCSV(sparkSession, verify(res, normalizedData), outputFolder + "/associationrules/" + alg)
         (alg, time_elapsed) :: executeAlgorithms(tail, sparkSession, sc, numClusters, normalizedData, outputFolder)
       }
       case _ => List[(String, Long)]()
@@ -128,11 +128,11 @@ object Main {
   def writeAssociationRulesToCSV(sparkSession: SparkSession, rules: RDD[(Set[String], Set[String], Double)], outputFolder: String) : Unit = {
 
     val associationRules = rules.map {
-      case (lhs, rhs, confidence) => (lhs.mkString(", "), rhs.mkString(", "), confidence)
+      case (lhs, rhs, accuracy) => (lhs.mkString(", "), rhs.mkString(", "), accuracy)
     }
 
     sparkSession.createDataFrame(associationRules)
-      .toDF("antecedent", "consequent", "confidence")
+      .toDF("antecedent", "consequent", "accuracy")
       .coalesce(1)
       .write
       .option("header", value = true)
