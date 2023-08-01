@@ -83,14 +83,6 @@ object EarthquakeKMeans {
       println(s"Cluster $clusterIndex size: $size")
     }
 
-
-    //// Discretize the extracted column using the trained K-means model
-    //val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
-      //val vector = Vectors.dense(value)
-      //val clusterIndex = clusters.predict(vector)
-      //(value, clusterIndex)
-    //})
-
     // Build and return the dataset together with cluster information
     val discretizedData = datasetRDD.map({ case (value, event) => {
         val vector = Vectors.dense(value)
@@ -102,23 +94,6 @@ object EarthquakeKMeans {
     discretizedData
 
 
-    //// Build and return the dataset together with cluster information
-    //Guarda il discretizedData[(Double, Int) e lo confronta con il datasetIniziale RDD[(Double, Event)], in modo 
-    //Bisognerebbe usare una reduceByKey?
-    //val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
-        //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
-    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
-
-    //clusteredDataset.map(_._2)
-
-    //// Build and return the dataset together with cluster information
-    //val clusteredDataset: RDD[(Double, (Int, Event))] = discretizedData.join(datasetRDD)
-    //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
-    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
-    //clusteredDataset.map(_._2)
-
-
-
 /*
     // -------------------------------------------------------------------------------------------------------------
     // Questa parte commentata è servita solo a verificare che tutte le coppie (Double, Int) con chiave k1
@@ -127,10 +102,7 @@ object EarthquakeKMeans {
     //      280 è il numero di chiavi distinte per il dataset_from_2020_01_to_2021_12.csv
     //      340 è il numero di chiavi distinte per il dataset_from_2010_01_to_2021_12.csv
     //val discretizedDataByKey = discretizedData.reduceByKey((x, y) => if (x == y) x else -100)
-    //println("count ERROR " + discretizedDataByKey.filter(_._2 == -100).count())
-    //println("count OK " + discretizedDataByKey.filter(_._2 != -100).count())
-    //discretizedDataByKey.foreach(x => println("reduceByKey " + x._1 + " " + x._2))
-    //val magClusterMap = discretizedDataByKey.collectAsMap()
+    //println("count ERROR " + discretizedDataByKey.filt
 
     // SCOMMENTA QUI SOTTO
     // Trasforma RDD in Map eliminando tutte le coppie (Double, Int) ripetute
@@ -143,24 +115,9 @@ object EarthquakeKMeans {
     // ------------------------------------------------------------------------------------------------------
 */
 
-
-//    // Discretize the extracted column using the trained K-means model
-//    val discretizedData: RDD[(Double, Int)] = datasetColumn.map(value => {
-//      val vector = Vectors.dense(value)
-//      val clusterIndex = clusters.predict(vector)
-//      (value, clusterIndex)
-//    })
-
-
-    //val magClusterMap = discretizedData.collectAsMap()
-    //val clusteredDataset = datasetRDD.map( tuple => (magClusterMap(tuple._1), tuple._2) )
-    //println("\tkMeansClustering - INPUT datasetRDD size: " + datasetRDD.count())
-    //println("\tkMeansClustering - OUTPUT clusteredDataset size: " + clusteredDataset.count())
-    //clusteredDataset
-
   }
 
-      /**
+  /**
    * Creates a lineplot with the WSSSE obtained for different number of clusters
    * @param wss_list list of wss calculated for each numnber of clusters
    * @param clusters_range min - max number of cluster tested
@@ -203,23 +160,6 @@ object EarthquakeKMeans {
     saveElbowLinePlot(wss_list, clusters_range, filename)
   }
 
-//  /**
-//   * Writes a given RDD into a CSV file.
-//   * @param rdd input data to be written
-//   * @param filePath  of the CSV file
-//   */
-//  private def writeRDDToCSV(rdd: RDD[(String, Int)], filePath: String): Unit = {
-//    val printWriter = new PrintWriter(new File(filePath))
-//
-//    // Write the data rows
-//    rdd.collect().foreach { case (strValue, _) =>
-//      val row = s"$strValue"
-//      printWriter.write(row + "\n")
-//    }
-//
-//    // Close the writer
-//    printWriter.close()
-//  }
 
   private def fromRowToRddEntry(row: Row): (Double, Event) = {
     (row(3).toString.toDouble, new Event((row(0).toString.toDouble, row(1).toString.toDouble),
@@ -228,22 +168,6 @@ object EarthquakeKMeans {
       row(4).toString.toInt))
   }
 
-
-//  def main(args: Array[String]): Unit = {
-//
-//    println("Started")
-//
-//    val appName = "Clustering.EarthquakeKMeans"
-//    val master = "local" // or "local[2]"
-//    val conf = new SparkConf()
-//      .setAppName(appName)
-//      .setMaster(master)
-//    val sc = new SparkContext(conf)
-//
-//    println("Loading Earthquake data...")
-//
-//    val discretizedDataMag: RDD[(Double, Int)] = kMeansClustering(sc, "/dataset_from_2010_01_to_2021_12.csv", 3, 5, 20, "clusteredDataMag")
-//  }
 
 }
 

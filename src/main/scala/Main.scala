@@ -85,7 +85,7 @@ object Main {
     algorithms match {
       case alg :: tail => {
         val (rules, time_elapsed) = time(alg, runAprioriForEachCluster(sc, numClusters, normalizedData, alg))
-        val res = rules.reduceLeft((a,b) => a.union(b).distinct())
+        val res = rules.reduceLeft((a,b) => a.union(b)).distinct()
         writeAssociationRulesToCSV(sparkSession, verify(res, normalizedData), outputFolder + "/associationrules/" + alg)
         (alg, time_elapsed) :: executeAlgorithms(tail, sparkSession, sc, numClusters, normalizedData, outputFolder)
       }
