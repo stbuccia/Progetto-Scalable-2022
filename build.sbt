@@ -11,9 +11,9 @@ lazy val root = (project in file("."))
       "org.apache.spark" %% "spark-core" % "3.2.2",
       "org.apache.spark" %% "spark-sql" % "3.2.2",
       "org.apache.spark" %% "spark-mllib" % "3.2.2"
-      /*"org.apache.spark" %% "spark-core" % "3.2.2" % "provided",*/
-      /*"org.apache.spark" %% "spark-sql" % "3.2.2" % "provided",*/
-      /*"org.apache.spark" %% "spark-mllib" % "3.2.2" % "provided",  */
+//      "org.apache.spark" %% "spark-core" % "3.2.2" % "provided",
+//      "org.apache.spark" %% "spark-sql" % "3.2.2" % "provided",
+//      "org.apache.spark" %% "spark-mllib" % "3.2.2" % "provided"
     ),
 
     assembly / assemblyJarName := "armep.jar",
