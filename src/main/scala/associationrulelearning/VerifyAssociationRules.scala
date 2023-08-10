@@ -19,19 +19,12 @@ object VerifyAssociationRules {
       .reduceByKey((x, y) => x + y)
       .collectAsMap()
 
-    // SOLO PER TEST ----------------------------------------------------
-    val ruleTest = rules.take(1)(0)
-    val supAnt = dataset.filter(transaction => ruleTest._1.subsetOf(transaction._2)).count().toDouble
-    val supUn = dataset.filter(transaction => ruleTest._1.union(ruleTest._2).subsetOf(transaction._2)).count().toDouble
-    println("TEST ------ "+ruleTest +"     "+ (supUn/supAnt))
-    //----------------------------------------------------
-
-
     rules.map(rule => {
       val supUnion: Double = mappaSupport(rule._1.union(rule._2))
       val supAnt: Double = mappaSupport(rule._1)
       (rule._1, rule._2, supUnion/supAnt)
     })
+
   }
 
 }
