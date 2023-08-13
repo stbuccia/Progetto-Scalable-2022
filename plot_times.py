@@ -4,6 +4,7 @@
 # to new times.csv file
 
 import csv
+import sys
 import matplotlib.pyplot as plt
 
 def removeDuplicatesInLegend():
@@ -16,7 +17,7 @@ def removeDuplicatesInLegend():
     plt.legend(newHandles, newLabels)
 
 
-def plot_csv_data(csv_file):
+def plot_csv_data(csv_file, x_data, x_label):
     x_coords = []
     y_coords = []
     plot_types = []
@@ -29,15 +30,16 @@ def plot_csv_data(csv_file):
     }
 
     lines_number = {
-        'dataset_from_2020_01_to_2021_12.csv' : 60587,
-        'dataset_from_2010_01_to_2021_12.csv' : 322585,
-        'dataset_from_1990_01_to_2022_12.csv' : 773630
+        'dataset_2020.csv' : 60587,
+        'dataset_2010.csv' : 322585,
+        'dataset_1990.csv' : 773630
     }
 
     with open(csv_file, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            x_coords.append((lines_number[row['dataset']]))
+            #x_coords.append((lines_number[row['dataset']]))
+            x_coords.append(row[x_data])
             y_coords.append(float(row['time elapsed (ms)']))
             plot_types.append(row['algorithm'])
 
@@ -48,7 +50,8 @@ def plot_csv_data(csv_file):
         y_plot = [y_coords[j] for j in range(len(plot_types)) if plot_types[j] == plot_type]
         plt.plot(x_plot, y_plot, 1, label=plot_type, color=colors[plot_type])
 
-    plt.xlabel('Rows in dataset')
+    #plt.xlabel('Rows in dataset')
+    plt.xlabel(x_label)
     plt.ylabel('Elapsed time in ms')
     plt.title('Elapsed time by Apriori Algorithm')
     removeDuplicatesInLegend()
@@ -57,5 +60,11 @@ def plot_csv_data(csv_file):
     plt.show()
 
 if __name__ == "__main__":
-    csv_file = "src/main/resources/times/times.csv"
-    plot_csv_data(csv_file)
+#     csv_file = "src/main/resources/times/times.csv"
+    if len(sys.argv) < 2:
+        print("You must specify a .csv file for plot!")
+        sys.exit()
+    csv_file = sys.argv[1]
+    x_data = sys.argv[2]
+    x_label = sys.argv[3]
+    plot_csv_data(csv_file, x_data, x_label)

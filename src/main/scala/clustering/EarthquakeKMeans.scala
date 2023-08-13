@@ -168,6 +168,5 @@ object EarthquakeKMeans {
       row(4).toString.toInt))
   }
 
-
 }
 
