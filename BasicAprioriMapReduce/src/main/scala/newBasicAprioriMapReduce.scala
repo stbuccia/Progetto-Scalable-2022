@@ -36,10 +36,9 @@ class newBasicAprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable w
   var associationRules: List[(Set[String], Set[String], Double)] = List()
   * */
 
-  override def run(): RDD[(Set[String], Set[String], Double)] = {
+  override def run(): Unit = {
 
     val rdd_itemsets_1 = countItemsetsSize1(transactions, rdd_size, minSupport)
-
     var rdd_itemsets = generateAndCountItemset(transactions, rdd_itemsets_1, itemSet, rdd_size, minSupport, 2)
 
     var i = 3
@@ -54,12 +53,10 @@ class newBasicAprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable w
         rdd_itemsets = rdd_itemsets.union(rdd_itemsets_N)
       i = i + 1
     }
+    frequentItemsets = rdd_itemsets.collect().toSet
 
     println("\nAssociation Rules:")
-    val associationRules = generateAssociationRules(rdd_itemsets, minConfidence, transactions)
-
-
-    associationRules
+    associationRules = generateAssociationRules(rdd_itemsets, minConfidence, transactions).collect().toList
 
   }
 

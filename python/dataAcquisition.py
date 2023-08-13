@@ -42,10 +42,13 @@ x = df['latitude'].isnull().sum()
 y = df['longitude'].isnull().sum()
 z = df['depth'].isnull().sum()
 q = df['mag'].isnull().sum()
+r = df['year'].isnull().sum()
+print("Null values:")
 print("lat "+str(x))
 print("lon "+str(y))
 print("dep "+str(z))
 print("mag "+str(q))
+print("year "+str(r))
 
 if(x>0):
     print("Before latitude "+str(df.shape[0]))
@@ -67,10 +70,16 @@ if(q>0):
     df = df['mag'].notnull()
     print("After mag "+str(df.shape[0]))
 
+if(r>0):
+    print("Before year "+str(df.shape[0]))
+    df = df['year'].notnull()
+    print("After year "+str(df.shape[0]))
+
 # scrivi file di output
 start = inputFiles[0][:7].replace('-','_')
 end = inputFiles[len(inputFiles)-1][:7].replace('-','_')
 #fileName = 'dataset_from_' +start +'_to_' +end +'.csv'
-fileName = "newDataset.csv"
+fileName = "dataset_from_2010.csv"
 df.to_csv(csv_path_output + fileName, index=False)
 print("Nuovo file creato: ", csv_path_output + fileName) 
+print("Numero totale righe = ", df.shape[0])

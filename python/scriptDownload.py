@@ -3,8 +3,8 @@ from urllib import request
 from urllib.error import HTTPError, URLError
 
 # Estremi compresi
-startYear = 1990
-endYear = 2022
+startYear = 1980
+endYear = 1989
 
 local_path = 'download/'
 if not os.path.exists(local_path):
