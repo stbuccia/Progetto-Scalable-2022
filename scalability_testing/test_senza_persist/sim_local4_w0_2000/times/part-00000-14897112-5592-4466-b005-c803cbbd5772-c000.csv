@@ -1,0 +1,5 @@
+algorithm,master,dataset,time elapsed (ms)
+aprioriseq,local[4],dataset_from_2000.csv,67875
+apriorispc,local[4],dataset_from_2000.csv,38104
+apriorimapreduce,local[4],dataset_from_2000.csv,47918
+fpgrowth,local[4],dataset_from_2000.csv,24067
