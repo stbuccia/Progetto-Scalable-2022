@@ -1,0 +1,5 @@
+algorithm,master,dataset,time elapsed (ms)
+aprioriseq,yarn,dataset_4.csv,96750
+apriorispc,yarn,dataset_4.csv,10130
+apriorimapreduce,yarn,dataset_4.csv,15927
+fpgrowth,yarn,dataset_4.csv,6586
