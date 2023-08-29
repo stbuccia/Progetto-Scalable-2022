@@ -3,27 +3,16 @@ import pandas as pd
 import numpy as np
 import os
 
-def createLineChart1(x1, y1, label1, xlabel, title, filename):
-    plt.plot(x1, y1, label = label1, linestyle="-")
+def createLineChart1(x1, y1, label1, xlabel, ylabel, title, filename):
+    plt.plot(x1, y1, label = label1, linestyle="-", marker = 'o')
     plt.xlabel(xlabel)
-    plt.ylabel("time elapsed (ms)")
+    plt.ylabel(ylabel)
     plt.legend()
     plt.title(title)
     plt.subplots_adjust(left=0.15, bottom=0.15)
     plt.savefig(filename+".png")
     plt.clf()
 
-
-def createLineChart2(x1, y1, x2, y2, label1, label2, title, filename):
-    plt.plot(x1, y1, label = label1, linestyle="-")
-    plt.plot(x2, y2, label = label2, linestyle="--")
-    plt.xlabel("dataset")
-    plt.ylabel("time elapsed (ms)")
-    plt.legend()
-    plt.title(title)
-    plt.subplots_adjust(left=0.15, bottom=0.15)
-    plt.savefig(filename+".png")
-    plt.clf()
 
 
 def createLineChart3(
@@ -32,18 +21,18 @@ def createLineChart3(
         x3, y3,  
         label1, label2, label3, 
         xlabel,
+        ylabel,
         title, filename):
-    plt.plot(x1, y1, label = label1, linestyle="--")
-    plt.plot(x2, y2, label = label2, linestyle="-.")
-    plt.plot(x3, y3, label = label3, linestyle=":")
+    plt.plot(x1, y1, label = label1, linestyle="-", marker = 'o')
+    plt.plot(x2, y2, label = label2, linestyle="--", marker = 's')
+    plt.plot(x3, y3, label = label3, linestyle="-.", marker = 'v')
     plt.xlabel(xlabel)
-    plt.ylabel("time elapsed (ms)")
+    plt.ylabel(ylabel)
     plt.legend()
     plt.title(title)
     plt.subplots_adjust(left=0.15, bottom=0.15)
     #plt.xticks(rotation = 45) 
     plt.savefig(filename+".png")
-    #plt.show()
     plt.clf()
 
 def createLineChart4(
@@ -53,58 +42,37 @@ def createLineChart4(
         x4, y4, 
         label1, label2, label3, label4, 
         xlabel,
+        ylabel,
         title, filename):
-    plt.plot(x1, y1, label = label1, linestyle="-")
-    plt.plot(x2, y2, label = label2, linestyle="--")
-    plt.plot(x3, y3, label = label3, linestyle="-.")
-    plt.plot(x4, y4, label = label4, linestyle=":")
+    plt.plot(x1, y1, label = label1, linestyle="-", marker = 'o')
+    plt.plot(x2, y2, label = label2, linestyle="--", marker = 's')
+    plt.plot(x3, y3, label = label3, linestyle="-.", marker = 'v')
+    plt.plot(x4, y4, label = label4, linestyle=":", marker = 'x')
     plt.xlabel(xlabel)
-    plt.ylabel("time elapsed (ms)")
+    plt.ylabel(ylabel)
     plt.legend()
     plt.title(title)
     plt.subplots_adjust(left=0.15, bottom=0.15)
     #plt.xticks(rotation = 45) 
     plt.savefig(filename+".png")
-    #plt.show()
     plt.clf()
 
-def comparePersist(df, df_persist, db_labels, dir_path):
-    master_types = ["local[1]", "local[1]", "local[3]", "lo1al[4]", "yarn_w2", "yarn_w3", "yarn_w4"]
-    algorithms = ["aprioriseq", "apriorispc", "apriorimapre2uce", "fpgrowth"]
-    for master in master_types:
-        for alg in algorithms:
-            query = str('master == "'+ master +'" & algorithm == "'+ alg +'"')
-            d = df.query(query)[['dataset', 'time elapsed (ms)']]
-            d = d.sort_values(by=['dataset'], ascending=False)
-            dp = df_persist.query(query)[['dataset', 'time elapsed (ms)']]
-            dp = dp.sort_values(by=['dataset'], ascending=False)
-            createLineChart2(
-                db_labels, 
-                d['time elapsed (ms)'], 
-                db_labels, 
-                dp['time elapsed (ms)'], 
-                "alg", alg+"_persist", 
-                alg+" "+master,
-                dir_path+"/grafici_confronto_persist/"+alg+"_"+master
-            )
 
 
-def compareAlgorithms(df, df_persist, db_labels, dir_path):
-    master_types = ["local[1]", "local[2]", "local[3]", "local[4]", "yarn_w2", "yarn_w3", "yarn_w4"]
-    algorithms = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
+def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
+    
+    
+
     for master in master_types:
         alg_list = []
-        alg_list_persist = []
+
         for alg in algorithms:
             query = str('master == "'+ master +'" & algorithm == "'+ alg +'"')
             d = df.query(query)[['dataset', 'time elapsed (ms)']]
-            d = d.sort_values(by=['dataset'], ascending=False)
+            d = d.sort_values(by=['dataset'], ascending=True)
             alg_list.append(d['time elapsed (ms)'])
 
-            dp = df_persist.query(query)[['dataset', 'time elapsed (ms)']]
-            dp = dp.sort_values(by=['dataset'], ascending=False)
-            alg_list_persist.append(dp['time elapsed (ms)'])
-
+        
         createLineChart4(
             db_labels, alg_list[0], 
             db_labels, alg_list[1],
@@ -112,27 +80,77 @@ def compareAlgorithms(df, df_persist, db_labels, dir_path):
             db_labels, alg_list[3],
             "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
             "dataset",
-            master,
-            dir_path+"/grafici_senza_persist/"+master
-        )
-        createLineChart4(
-            db_labels, alg_list_persist[0], 
-            db_labels, alg_list_persist[1],
-            db_labels, alg_list_persist[2], 
-            db_labels, alg_list_persist[3],
-            "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-            "dataset",
-            master,
-            dir_path+"/grafici_con_persist/"+master
+            "time (ms)",
+            fromMasterToCore(master)+" cores",
+            dir_path+"/grafici_algoritmi/"+fromMasterToCore(master)+"_cores"
         )
 
-def strongScalability(df, df_persist, db_labels, dir_path):
-    master_types = ["local[1]", "local[2]", "local[3]", "local[4]", "yarn_w2", "yarn_w3", "yarn_w4"]
-    algorithms = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
+        createLineChart3(
+            db_labels, alg_list[1],
+            db_labels, alg_list[2], 
+            db_labels, alg_list[3],
+            "apriorispc", "apriorimapreduce", "fpgrowth",
+            "dataset",
+            "time (ms)",
+            fromMasterToCore(master)+" cores",
+            dir_path+"/grafici_algoritmi/"+fromMasterToCore(master)+"_cores_noSeq"
+        )
+
+        for i in range(4):
+            createLineChart1(
+                db_labels, alg_list[i], 
+                algorithms[i],
+                "dataset",
+                "time (ms)",
+                algorithms[i] + " - " +fromMasterToCore(master)+" cores",
+                dir_path+"/grafici_algoritmi/"+fromMasterToCore(master)+"_cores_"+algorithms[i]
+            )
+        
+
+        # in secondi
+        secondi = convertListToSecond(alg_list)
+
+        createLineChart4(
+            db_labels, secondi[0], 
+            db_labels, secondi[1],
+            db_labels, secondi[2], 
+            db_labels, secondi[3],
+            "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+            "dataset",
+            "time (s)",
+            fromMasterToCore(master)+" cores",
+            dir_path+"/grafici_algoritmi/sec_"+fromMasterToCore(master)+"_cores"
+        )
+
+        createLineChart3(
+            db_labels, secondi[1],
+            db_labels, secondi[2], 
+            db_labels, secondi[3],
+            "apriorispc", "apriorimapreduce", "fpgrowth",
+            "dataset",
+            "time (s)",
+            fromMasterToCore(master)+" cores",
+            dir_path+"/grafici_algoritmi/sec_"+fromMasterToCore(master)+"_cores_noSeq"
+        )
+
+        for i in range(4):
+            createLineChart1(
+                db_labels, secondi[i], 
+                algorithms[i],
+                "dataset",
+                "time (s)",
+                algorithms[i] + " - " +fromMasterToCore(master)+" cores",
+                dir_path+"/grafici_algoritmi/sec_"+fromMasterToCore(master)+"_cores_"+algorithms[i]
+            )
+        
+        
+        
+
+def strongScalability(df, db_labels, master_types, algorithms, dir_path):
+    n_core = ["2", "4", "8", "16"]
 
     for db in db_labels:
         alg_list = []
-        alg_list_persist = []
 
         for alg in algorithms:
             query = str('dataset == '+ db +' & algorithm == "'+ alg +'"')
@@ -140,173 +158,134 @@ def strongScalability(df, df_persist, db_labels, dir_path):
             d = d.sort_values(by=['master'])
             alg_list.append(d['time elapsed (ms)'])
 
-            dp = df_persist.query(query)[['master', 'time elapsed (ms)']]
-            dp = dp.sort_values(by=['master'])
-            alg_list_persist.append(dp['time elapsed (ms)'])
 
+        for i in range(4):
+            createLineChart1(
+                n_core, alg_list[i], 
+                algorithms[i],
+                "# core",
+                "time (ms)",
+                "Strong scalability - db"+db +" - " +algorithms[i],
+                dir_path+"/grafici_strong_scalability/strong_scalability_db"+db+"_"+algorithms[i]
+            )
+        
         createLineChart4(
-            master_types, alg_list[0], 
-            master_types, alg_list[1],
-            master_types, alg_list[2], 
-            master_types, alg_list[3],
+            n_core, alg_list[0], 
+            n_core, alg_list[1],
+            n_core, alg_list[2], 
+            n_core, alg_list[3],
             "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-            "dataset",
-            "Strong scalability - "+db,
-            dir_path+"/grafici_senza_persist/strong_scalability_"+db
+            "# core",
+            "time (ms)",
+            "Strong scalability - db"+db,
+            dir_path+"/grafici_strong_scalability/strong_scalability_db"+db
         )
 
         createLineChart3( 
-            master_types, alg_list[1],
-            master_types, alg_list[2], 
-            master_types, alg_list[3],
+            n_core, alg_list[1],
+            n_core, alg_list[2], 
+            n_core, alg_list[3],
             "apriorispc", "apriorimapreduce", "fpgrowth",
-            "dataset",
-            "Strong scalability - "+db,
-            dir_path+"/grafici_senza_persist/strong_scalability_"+db+"_noSeq"
+            "# core",
+            "time (ms)",
+            "Strong scalability - db"+db,
+            dir_path+"/grafici_strong_scalability/strong_scalability_db"+db+"_noSeq"
         )
-         
+
+        # in secondi
+        secondi = convertListToSecond(alg_list)
+
+        for i in range(4):
+            createLineChart1(
+                n_core, secondi[i], 
+                algorithms[i],
+                "# core",
+                "time (s)",
+                "Strong scalability - db"+db +" - " +algorithms[i],
+                dir_path+"/grafici_strong_scalability/sec_strong_scalability_db"+db+"_"+algorithms[i]
+            )
+
         createLineChart4(
-            master_types, alg_list_persist[0], 
-            master_types, alg_list_persist[1],
-            master_types, alg_list_persist[2], 
-            master_types, alg_list_persist[3],
+            n_core, secondi[0], 
+            n_core, secondi[1],
+            n_core, secondi[2], 
+            n_core, secondi[3],
             "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-            "dataset",
-            "Strong scalability - "+db,
-            dir_path+"/grafici_con_persist/strong_scalability_"+db
+            "# core",
+            "time (s)",
+            "Strong scalability - db"+db,
+            dir_path+"/grafici_strong_scalability/sec_strong_scalability_db"+db
         )
 
         createLineChart3( 
-            master_types, alg_list_persist[1],
-            master_types, alg_list_persist[2], 
-            master_types, alg_list_persist[3],
+            n_core, secondi[1],
+            n_core, secondi[2], 
+            n_core, secondi[3],
             "apriorispc", "apriorimapreduce", "fpgrowth",
-            "dataset",
-            "Strong scalability - "+db,
-            dir_path+"/grafici_con_persist/strong_scalability_"+db+"_noSeq"
+            "# core",
+            "time (s)",
+            "Strong scalability - db"+db,
+            dir_path+"/grafici_strong_scalability/sec_strong_scalability_db"+db+"_noSeq"
         )
+
+
+        
+        
+        
         
 
-def weakScalability(df, df_persist, db_labels, dir_path):
-    master_types = ["local[1]", "local[2]", "local[3]", "local[4]", "yarn_w2", "yarn_w3", "yarn_w4"]
-    #n_core = ["2", "4", "8", "16"]
-    n_core = ["2", "8", "16"]
-    algorithms = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
-
+def weakScalability(df, db_labels, master_types, algorithms, dir_path):
+    n_core = ["2", "4", "8", "16"]
     alg_list = []
-    alg_list_persist = []
+
     for alg in algorithms:
         times = []
 
-        """ query = str('dataset == 2010 & algorithm == "'+ alg +'" & master == "local[2]"' )
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 2000 & algorithm == "'+ alg +'"' +' & master == "local[4]" ')
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 1990 & algorithm == "'+ alg +'"' +' & master == "yarn_w2" ')
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)')) 
-        
-        query = str('dataset == 1980 & algorithm == "'+ alg +'"' +' & master == "yarn_w4" ')
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)'))
-        
-        """
-        query = str('dataset == 2010 & algorithm == "'+ alg +'" & master == "local[2]"' )
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 2000 & algorithm == "'+ alg +'"' +' & master == "yarn_w2" ')
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 1980 & algorithm == "'+ alg +'"' +' & master == "yarn_w4" ')
-        x = df.query(query)['time elapsed (ms)']
-        times.append(x._get_value(0, 'time elapsed (ms)'))
+        for i in range(4):
+            query = str('dataset == '+ db_labels[i] +' & algorithm == "'+ alg +'" & master == "'+ master_types[i] +'"' )
+            x = df.query(query)['time elapsed (ms)']
+            times.append(x._get_value(0, 'time elapsed (ms)'))
 
         alg_list.append(times)
 
-
-
-        times_persist = []
-        
-        """ 
-        query = str('dataset == 2010 & algorithm == "'+ alg +'"' +' & master == "local[2]" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 2000 & algorithm == "'+ alg +'"' +' & master == "local[4]" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 1990 & algorithm == "'+ alg +'"' +' & master == "yarn_w2" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 1980 & algorithm == "'+ alg +'"' +' & master == "yarn_w4" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-        """
-
-        query = str('dataset == 2010 & algorithm == "'+ alg +'"' +' & master == "local[2]" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 2000 & algorithm == "'+ alg +'"' +' & master == "yarn_w2" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-
-        query = str('dataset == 1980 & algorithm == "'+ alg +'"' +' & master == "yarn_w4" ')
-        x = df_persist.query(query)['time elapsed (ms)']
-        times_persist.append(x._get_value(0, 'time elapsed (ms)'))
-
-        alg_list_persist.append(times_persist)
 
         """ ar = np.array(times)
         ar_persist = np.array(times_persist)
         print(alg,"senza", ar)
         print(alg, "con", ar_persist)  """
     
+        
         createLineChart1( 
             n_core, times,
             alg, 
-            "n core",
+            "# core",
+            "time (ms)",
             "Weak scalability - "+alg,
-            dir_path+"/grafici_senza_persist/weak_scalability_"+alg
+            dir_path+"/grafici_weak_scalability/weak_scalability_"+alg
         )   
 
+        # in secondi
+        secondi = convertToSecond(times)
         createLineChart1( 
-            n_core, times_persist,
+            n_core, secondi,
             alg, 
-            "n core",
+            "# core",
+            "time (s)",
             "Weak scalability - "+alg,
-            dir_path+"/grafici_con_persist/weak_scalability_"+alg
+            dir_path+"/grafici_weak_scalability/sec_weak_scalability_"+alg
         )   
-    
 
+    
     createLineChart4(
         n_core, alg_list[0], 
         n_core, alg_list[1],
         n_core, alg_list[2], 
         n_core, alg_list[3],
         "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-        "n core",
+        "# core",
+        "time (ms)",
         "Weak scalability",
-        dir_path+"/grafici_senza_persist/weak_scalability"
-    )
-
-    createLineChart4(
-        n_core, alg_list_persist[0], 
-        n_core, alg_list_persist[1],
-        n_core, alg_list_persist[2], 
-        n_core, alg_list_persist[3],
-        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-        "n core",
-        "Weak scalability",
-        dir_path+"/grafici_con_persist/weak_scalability"
+        dir_path+"/grafici_weak_scalability/weak_scalability"
     )
 
     createLineChart3(
@@ -314,30 +293,68 @@ def weakScalability(df, df_persist, db_labels, dir_path):
         n_core, alg_list[2], 
         n_core, alg_list[3],
         "apriorispc", "apriorimapreduce", "fpgrowth",
-        "n core",
+        "# core",
+        "time (ms)",
         "Weak scalability",
-        dir_path+"/grafici_senza_persist/weak_scalability_noSeq"
+        dir_path+"/grafici_weak_scalability/weak_scalability_noSeq"
+    )
+
+    # in secondi
+    secondi = convertListToSecond(alg_list)
+    createLineChart4(
+        n_core, secondi[0], 
+        n_core, secondi[1],
+        n_core, secondi[2], 
+        n_core, secondi[3],
+        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "# core",
+        "time (s)",
+        "Weak scalability",
+        dir_path+"/grafici_weak_scalability/sec_weak_scalability"
     )
 
     createLineChart3(
-        n_core, alg_list_persist[1],
-        n_core, alg_list_persist[2], 
-        n_core, alg_list_persist[3],
+        n_core, secondi[1],
+        n_core, secondi[2], 
+        n_core, secondi[3],
         "apriorispc", "apriorimapreduce", "fpgrowth",
-        "n core",
+        "# core",
+        "time (s)",
         "Weak scalability",
-        dir_path+"/grafici_con_persist/weak_scalability_noSeq"
+        dir_path+"/grafici_weak_scalability/sec_weak_scalability_noSeq"
     )
+    
+def convertListToSecond(x):
+    outputList = []
+    for elem in x:
+        outputList.append(convertToSecond(elem))
+    return outputList
+
+def convertToSecond(x):
+    outputList = []
+    for elem in x:
+        outputList.append(elem / 1000)
+    return outputList
+
+def fromMasterToCore(master):
+    if("w2_c1" in master):
+        return "2"
+    if("w2_c2" in master):
+        return "4"
+    if("w4_c2" in master):
+        return "8"
+    if("w4_c4" in master):
+        return "16"
 
 
 if __name__ == "__main__":
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    db_labels = ["2010", "2000", "1990", "1980"]
-    csv_file_persist = dir_path + "/test_results_con_persist.csv"
-    csv_file = dir_path + "/test_results_senza_persist.csv"
-    df_persist = pd.read_csv(csv_file_persist)
+    db_labels = ["1", "2", "3", "4"]
+    master_types = ["yarn_w2_c1", "yarn_w2_c2", "yarn_w4_c2", "yarn_w4_c4"]
+    algorithms = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
+
+    csv_file = dir_path + "/test_results.csv"
     df = pd.read_csv(csv_file)
-    #comparePersist(df, df_persist, db_labels, dir_path)
-    #compareAlgorithms(df, df_persist, db_labels, dir_path)
-    #strongScalability(df, df_persist, db_labels, dir_path)
-    weakScalability(df, df_persist, db_labels, dir_path)
+    compareAlgorithms(df, db_labels, master_types, algorithms, dir_path)
+    strongScalability(df, db_labels, master_types, algorithms, dir_path)
+    weakScalability(df, db_labels, master_types, algorithms, dir_path)

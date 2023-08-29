@@ -13,7 +13,7 @@ def findNumWorker(dirName):
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 csv_path_input = dir_path + "/results/"
-fileNameOutput = "test_results_senza_persist.csv"
+fileNameOutput = "test_results.csv"
 
 
 
@@ -21,18 +21,16 @@ fileNameOutput = "test_results_senza_persist.csv"
 sumRows = 0
 listCSV = []
 inputDirs = os.listdir(csv_path_input)
-#print("inputDirs", len(inputDirs), ":", inputDirs)
 target_mapping = {
-    'dataset_from_1980.csv': 1980,
-    'dataset_from_1990.csv': 1990,
-    'dataset_from_2000.csv': 2000,
-    'dataset_from_2010.csv': 2010
+    'dataset_4.csv': 4,
+    'dataset_3.csv': 3,
+    'dataset_2.csv': 2,
+    'dataset_1.csv': 1
 }
 j = 0
 tot = len(inputDirs)
 for dir in inputDirs:
     inputFiles = os.listdir(csv_path_input + dir +"/times/")
-    #print("inputFiles", len(inputFiles), ":", inputFiles)
     for file in inputFiles:
         if file.endswith('.csv'):
             print("Read file: ", csv_path_input + dir + "/times/" + file)
@@ -40,9 +38,9 @@ for dir in inputDirs:
             
             df_read["dataset"] = df_read["dataset"].map(lambda x: target_mapping[x])
 
-            if("yarn" in dir):
-                n_worker = findNumWorker(dir)
-                df_read['master'] = "yarn_" + n_worker
+            #if("yarn" in dir):
+            #    n_worker = findNumWorker(dir)
+            #    df_read['master'] = "yarn_"+n_worker
                 
 
             listCSV.append(df_read)
