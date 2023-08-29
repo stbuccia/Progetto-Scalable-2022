@@ -11,7 +11,6 @@ def findNumWorker(dirName):
         
 
 
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 csv_path_input = dir_path + "/results/"
 fileNameOutput = "test_results_senza_persist.csv"
@@ -43,7 +42,7 @@ for dir in inputDirs:
 
             if("yarn" in dir):
                 n_worker = findNumWorker(dir)
-                df_read['master'] = "yarn_"+n_worker
+                df_read['master'] = "yarn_" + n_worker
                 
 
             listCSV.append(df_read)
