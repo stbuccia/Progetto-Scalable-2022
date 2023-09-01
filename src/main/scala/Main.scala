@@ -20,15 +20,20 @@ object Main {
       System.exit(1)
     }
 
-    val master = args(0)
-    val datasetPath = args(1)
-    val simulation = if (args(2) == "sim=true") true else false
-    val outputFolder = args(3)
-
+    var master = ""
+    var datasetPath = ""
+    var simulation = false
+    var outputFolder = ""
     var classifier = ""
+    var computeElbowMode = false
 
-    if (!simulation) {
-      classifier = args(4)
+    args.sliding(2,2).toList.collect {
+      case Array("--master", masterName: String) => master = masterName
+      case Array("--dataset", path: String) => datasetPath = path
+      case Array("--sim", flag: String) => simulation = flag.toBoolean
+      case Array("--classifier", classifierName: String) => classifier = classifierName
+      case Array("--compute-elbow-mode", flag: String) => computeElbowMode = flag.toBoolean
+      case Array("--output", path: String) => outputFolder = path
     }
 
     println("Configuration:")
@@ -37,6 +42,7 @@ object Main {
     if (!simulation) {
       println(s"- classifier: $classifier")
     }
+    println(s"- compute elbow mode: $computeElbowMode")
     println(s"- output folder: $outputFolder")
 
 
@@ -68,7 +74,7 @@ object Main {
 
     val attributeForClustering = 3 // chose magnitude as dimension on which to perform clustering
     val numClusters = 5
-    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", computeElbowMode = false)
+    val clusteredData = kMeansClustering(sc, datasetDF, attributeForClustering, numClusters, 20, "clusteredDataMag", computeElbowMode)
 
     // Normalize data
 

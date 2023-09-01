@@ -25,15 +25,6 @@ class FPGrowth(dataset: RDD[Set[String]]) extends Serializable with Apriori[RDD[
         val associationRules: RDD[(Set[String], Set[String], Double)] = model.generateAssociationRules(minConfidence).map{rule =>
             (rule.antecedent.toSet, rule.consequent.toSet, rule.confidence)}
 
-
-        println("===Frequent Itemsets===")
-        frequentItemsets.collect().sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
-
-        println("===Association Rules===")
-        associationRules.sortBy(_._3).foreach { case (lhs, rhs, confidence) =>
-            println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
-        }
-
         associationRules
     }
 }

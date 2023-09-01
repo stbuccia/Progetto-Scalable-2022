@@ -42,18 +42,6 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends java.io.Serializable wi
     setL_k
   }
 
-
-  def candidateExistsInTransaction(candidate: Set[String], transaction: Set[String]): Boolean = {
-    // all elements in candidate exist in transaction
-    var result = true
-    for (elem <- candidate) {
-      if (!transaction.contains(elem))
-        result = false
-    }
-    result
-  }
-
-
   @tailrec
   private def recursivePhase2(transactionsRdd: RDD[Set[String]], k: Int, setL: RDD[(Set[String], Int)]): RDD[(Set[String], Int)] = {
     if (k > 4)
@@ -72,7 +60,7 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends java.io.Serializable wi
     val frequentItemsetsList = frequentItemsets.collect().toList
 
     val associationRules = frequentItemsets.flatMap { case (itemset, support) =>
-      val subsets = itemset.subsets().toList.filter(_.nonEmpty)//.filter(_.size == itemset.size - 1)
+      val subsets = itemset.subsets().toList.filter(_.nonEmpty)
       subsets.map { subset =>
         val remaining = itemset -- subset
         val confidence = support.toDouble / frequentItemsetsList.filter(_._1 == subset).map(_._2).head
@@ -84,25 +72,25 @@ class AprioriSparkSPC(dataset: RDD[Set[String]]) extends java.io.Serializable wi
 
   }
 
+  def candidateExistsInTransaction(candidate: Set[String], transaction: Set[String]): Boolean = {
+    // all elements in candidate exist in transaction
+    var result = true
+    for (elem <- candidate) {
+      if (!transaction.contains(elem))
+        result = false
+    }
+    result
+  }
+
+
   override def run(): RDD[(Set[String], Set[String], Double)] = {
-    //TODO: Capire perché dà questi problemi se aumentiano a più nodi (controllare shuffling e partitioning sulle slide)
-
-
     val transactionsRdd = (transactions)
 
-    val setL_1 = phase1(transactionsRdd)  // returns a set with only minSupport entries
+    val setL_1 = phase1(transactionsRdd) 
     val setL_2 = setL_1.union(phase2(transactionsRdd, 2, setL_1))
 
     val frequentItemsets: RDD[(Set[String], Int)] = recursivePhase2(transactionsRdd, 3, setL_2)
     val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(frequentItemsets, minConfidence)
-
-    println("===Frequent Itemsets===")
-    frequentItemsets.collect().sortBy(_._1.size).foreach(itemset => println(itemset._1.mkString("(", ", ", ")") + "," + itemset._2))
-
-    println("===Association Rules===")
-    associationRules.sortBy(_._3).foreach { case (lhs, rhs, confidence) =>
-      println(s"${lhs.mkString(", ")} => ${rhs.mkString(", ")} (Confidence: $confidence)")
-    }
 
     associationRules
 
