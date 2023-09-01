@@ -33,7 +33,7 @@ object Main {
       case Array("--sim", flag: String) => simulation = flag.toBoolean
       case Array("--classifier", classifierName: String) => classifier = classifierName
       case Array("--compute-elbow-mode", flag: String) => computeElbowMode = flag.toBoolean
-      case Array("--output", path: String) => outputFolder = path
+      case Array("--output-folder", path: String) => outputFolder = path
     }
 
     println("Configuration:")
