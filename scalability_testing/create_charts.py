@@ -347,13 +347,22 @@ def fromMasterToCore(master):
         return "16"
 
 
+def computeResultFilePath():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    pathArray = dir_path.split("/")
+    pathArray = pathArray[:len(pathArray)-1]
+    resFilePath = ('/'.join(x for x in pathArray)) + "/script_cloud/result_db.csv"
+    return resFilePath
+
+
+
 if __name__ == "__main__":
     dir_path = os.path.dirname(os.path.realpath(__file__))
     db_labels = ["1", "2", "3", "4"]
     master_types = ["yarn_w2_c1", "yarn_w2_c2", "yarn_w4_c2", "yarn_w4_c4"]
     algorithms = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
 
-    csv_file = dir_path + "/test_results.csv"
+    csv_file = computeResultFilePath()
     df = pd.read_csv(csv_file)
     compareAlgorithms(df, db_labels, master_types, algorithms, dir_path)
     strongScalability(df, db_labels, master_types, algorithms, dir_path)
