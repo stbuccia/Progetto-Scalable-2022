@@ -1,8 +1,9 @@
 import pandas as pd
 import os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 def editTimesFile():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
     inputDirs = os.listdir(dir_path + "/output")
     for dir in inputDirs:
         inputFiles = os.listdir(dir_path + "/output/" + dir +"/times/")
@@ -16,7 +17,6 @@ def editTimesFile():
                 df.to_csv(filePath, index=False)
 
 def mergeResult():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
     csv_path_input = dir_path + "/output/"
     fileNameOutput = "result_db.csv"
 
@@ -24,11 +24,17 @@ def mergeResult():
     sumRows = 0
     listCSV = []
     inputDirs = os.listdir(csv_path_input)
-    target_mapping = {
+    db_mapping = {
         'dataset_4.csv': 4,
         'dataset_3.csv': 3,
         'dataset_2.csv': 2,
         'dataset_1.csv': 1
+    }
+    alg_mapping = {
+        'aprioriseq': 'AprioriSeq',
+        'aprioritailrec': 'AprioriTailRec',
+        'apriorimapreduce': 'AprioriMapReduce',
+        'fpgrowth': 'FPGrowth'
     }
     j = 0
     tot = len(inputDirs)
@@ -36,9 +42,9 @@ def mergeResult():
         inputFiles = os.listdir(csv_path_input + dir +"/times/")
         for file in inputFiles:
             if file.endswith('.csv'):
-                #print("Read file: ", csv_path_input + dir + "/times/" + file)
                 df_read = pd.read_csv(csv_path_input + dir + "/times/" + file)
-                df_read["dataset"] = df_read["dataset"].map(lambda x: target_mapping[x])
+                df_read["dataset"] = df_read["dataset"].map(lambda x: db_mapping[x])
+                df_read["algorithm"] = df_read["algorithm"].map(lambda x: alg_mapping[x])
                 listCSV.append(df_read)
                 sumRows = sumRows + df_read.shape[0]
                 j = j + 1

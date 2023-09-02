@@ -78,7 +78,7 @@ object Main {
 
     // Normalize data
 
-    val normalizedData: RDD[(Int, Set[String])] = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))//.persist()
+    val normalizedData: RDD[(Int, Set[String])] = clusteredData.map(entry => (entry._1, labelConversion(entry._2))).persist()
 
     val algorithms = if (simulation) List("aprioriseq", "aprioritailrec", "apriorimapreduce", "fpgrowth") else List(classifier)
 

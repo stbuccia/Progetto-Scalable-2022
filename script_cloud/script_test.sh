@@ -4,7 +4,7 @@ PROJECT_NAME=natural-axiom-390913
 CLUSTER=cluster-apriori
 REGION=us-east1
 ZONE=us-east1-c
-BUCKET=gs://bucket-apriori
+BUCKET=gs://b-apriori
 MASTER_MACHINE_TYPE=n1-standard-4
 JAR_NAME=armep.jar
 DATASET_1=dataset_1.csv
@@ -81,7 +81,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_1 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_1 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 2
     DIR=sim_yarn_w4_c4_2
@@ -90,7 +90,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_2 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_2 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 3
     DIR=sim_yarn_w4_c4_3
@@ -99,7 +99,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_3 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_3 --sim true --output-folder $BUCKET/output/$DIR/
 
      # submit job con dataset 4
     DIR=sim_yarn_w4_c4_4
@@ -108,7 +108,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_4 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_4 --sim true --output-folder $BUCKET/output/$DIR/
 
 
     gcloud dataproc clusters delete $CLUSTER --region=$REGION --quiet
@@ -141,7 +141,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_1 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_1 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 2
     DIR=sim_yarn_w4_c2_2
@@ -150,7 +150,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_2 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_2 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 3
     DIR=sim_yarn_w4_c2_3
@@ -159,7 +159,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_3 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_3 --sim true --output-folder $BUCKET/output/$DIR/
 
      # submit job con dataset 4
     DIR=sim_yarn_w4_c2_4
@@ -168,7 +168,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_4 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_4 --sim true --output-folder $BUCKET/output/$DIR/
 
 
     gcloud dataproc clusters delete $CLUSTER --region=$REGION --quiet
@@ -201,7 +201,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_1 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_1 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 2
     DIR=sim_yarn_w2_c2_2
@@ -210,7 +210,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_2 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_2 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 3
     DIR=sim_yarn_w2_c2_3
@@ -219,7 +219,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_3 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_3 --sim true --output-folder $BUCKET/output/$DIR/
 
      # submit job con dataset 4
     DIR=sim_yarn_w2_c2_4
@@ -228,17 +228,17 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_4 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_4 --sim true --output-folder $BUCKET/output/$DIR/
 
 
     gcloud dataproc clusters delete $CLUSTER --region=$REGION --quiet
     echo -e "\nEliminato cluster con 2 worker n1-standard-2\n"
 
 
-# ESECUZIONE TEST - 2 worker n1-standard-1 ------------------------------------------------------------------------------------------
+# ESECUZIONE TEST - 2 worker 1 core ------------------------------------------------------------------------------------------
     NUM_WORKER=2 
     WORKER_MACHINE_TYPE=custom-1-6656-ext
-    echo -e "\nTEST - 4 worker n1-standard-1\n"
+    echo -e "\nTEST - 2 worker 1 core\n"
     
     gcloud dataproc clusters create $CLUSTER \
     --enable-component-gateway \
@@ -251,7 +251,7 @@ fi
     --image-version $IMAGE_VERSION \
     --project $PROJECT_NAME 
 
-    echo -e "\nCreato cluster con 2 worker n1-standard-1\n"
+    echo -e "\nCreato cluster con 2 worker 1 core\n"
 
     # submit job con dataset 1
     DIR=sim_yarn_w2_c1_1
@@ -260,7 +260,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_1 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_1 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 2
     DIR=sim_yarn_w2_c1_2
@@ -269,7 +269,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_2 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_2 --sim true --output-folder $BUCKET/output/$DIR/
 
     # submit job con dataset 3
     DIR=sim_yarn_w2_c1_3
@@ -278,7 +278,7 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_3 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_3 --sim true --output-folder $BUCKET/output/$DIR/
 
      # submit job con dataset 4
     DIR=sim_yarn_w2_c1_4
@@ -287,11 +287,11 @@ fi
         --class=$MAIN_CLASS \
         --jars=$BUCKET/$JAR_NAME \
         --region=$REGION \
-        -- $MASTER $BUCKET/input/$DATASET_4 "sim=true" $BUCKET/output/$DIR/
+        -- --master $MASTER --dataset $BUCKET/input/$DATASET_4 --sim true --output-folder $BUCKET/output/$DIR/
 
 
     gcloud dataproc clusters delete $CLUSTER --region=$REGION --quiet
-    echo -e "\nEliminato cluster con 2 worker n1-standard-1\n"
+    echo -e "\nEliminato cluster con 2 worker 1 core\n"
 
 
 # DOWNLOAD ------------------------------------------------------------------------------------------

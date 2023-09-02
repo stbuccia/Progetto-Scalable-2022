@@ -3,9 +3,15 @@ import numpy as np
 import pandas as pd
 import os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+db_labels = ["1", "2", "3", "4"]
+db_size = ["100000", "200000", "300000", "400000"]
+algorithms = ["AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth"]
+master_types = ["yarn_w2_c1", "yarn_w2_c2", "yarn_w4_c2", "yarn_w4_c4"]
+n_core = ["2", "4", "8", "16"]
+
 
 def createBarChart1(x1, y1, label1, xlabel, ylabel, title, filename):
-    db_size = ["100000", "200000", "300000", "400000"]
     colors = {'100000':'red', '200000':'green', '300000':'blue', '400000':'#FFD700'}         
     labels = list(colors.keys())
     handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in labels]
@@ -31,9 +37,9 @@ def createBarChart3(
         ylabel,
         title, filename):
      
-    algorithms = {'apriorispc':'green', 'apriorimapreduce':'blue', 'fpgrowth':'#FFD700'}         
-    labels = ["apriorispc", "apriorimapreduce", "fpgrowth"]
-    handles = [plt.Rectangle((0,0),1,1, color=algorithms[label]) for label in labels]
+    algorithmsMap = {'AprioriTailRec':'green', 'AprioriMapReduce':'blue', 'FPGrowth':'#FFD700'}         
+    labels = algorithms[1:]
+    handles = [plt.Rectangle((0,0),1,1, color=algorithmsMap[label]) for label in labels]
     plt.legend(handles, labels,  title="Algorithms")
 
     barWidth = 0.2
@@ -64,9 +70,9 @@ def createBarChart4(
         ylabel,
         title, filename):
      
-    algorithms = {'aprioriseq':'red', 'apriorispc':'green', 'apriorimapreduce':'blue', 'fpgrowth':'#FFD700'}         
-    labels = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
-    handles = [plt.Rectangle((0,0),1,1, color=algorithms[label]) for label in labels]
+    algorithmsMap = {'AprioriSeq':'red', 'AprioriTailRec':'green', 'AprioriMapReduce':'blue', 'FPGrowth':'#FFD700'}      
+    labels = algorithms
+    handles = [plt.Rectangle((0,0),1,1, color=algorithmsMap[label]) for label in labels]
     plt.legend(handles, labels,  title="Algorithms")
 
     barWidth = 0.2
@@ -142,10 +148,8 @@ def createLineChart4(
     plt.clf()
 
 
-def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
+def compareAlgorithms(df):
     
-    sizeDb = list(map(lambda num: str(int(num) * 100000), db_labels))
-
     for master in master_types:
         alg_list = []
 
@@ -157,11 +161,11 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
 
         
         createLineChart4(
-            sizeDb, alg_list[0], 
-            sizeDb, alg_list[1],
-            sizeDb, alg_list[2], 
-            sizeDb, alg_list[3],
-            "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+            db_size, alg_list[0], 
+            db_size, alg_list[1],
+            db_size, alg_list[2], 
+            db_size, alg_list[3],
+            "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "dataset",
             "time (ms)",
             fromMasterToCore(master)+" cores",
@@ -169,10 +173,10 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
         )
 
         createLineChart3(
-            sizeDb, alg_list[1],
-            sizeDb, alg_list[2], 
-            sizeDb, alg_list[3],
-            "apriorispc", "apriorimapreduce", "fpgrowth",
+            db_size, alg_list[1],
+            db_size, alg_list[2], 
+            db_size, alg_list[3],
+            "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "dataset",
             "time (ms)",
             fromMasterToCore(master)+" cores",
@@ -181,7 +185,7 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
 
         for i in range(4):
             createLineChart1(
-                sizeDb, alg_list[i], 
+                db_size, alg_list[i], 
                 algorithms[i],
                 "dataset",
                 "time (ms)",
@@ -194,11 +198,11 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
         secondi = convertListToSecond(alg_list)
 
         createLineChart4(
-            sizeDb, secondi[0], 
-            sizeDb, secondi[1],
-            sizeDb, secondi[2], 
-            sizeDb, secondi[3],
-            "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+            db_size, secondi[0], 
+            db_size, secondi[1],
+            db_size, secondi[2], 
+            db_size, secondi[3],
+            "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "dataset",
             "time (s)",
             fromMasterToCore(master)+" cores",
@@ -206,10 +210,10 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
         )
 
         createLineChart3(
-            sizeDb, secondi[1],
-            sizeDb, secondi[2], 
-            sizeDb, secondi[3],
-            "apriorispc", "apriorimapreduce", "fpgrowth",
+            db_size, secondi[1],
+            db_size, secondi[2], 
+            db_size, secondi[3],
+            "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "dataset",
             "time (s)",
             fromMasterToCore(master)+" cores",
@@ -218,7 +222,7 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
 
         for i in range(4):
             createLineChart1(
-                sizeDb, secondi[i], 
+                db_size, secondi[i], 
                 algorithms[i],
                 "dataset",
                 "time (s)",
@@ -227,8 +231,7 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
             )
        
 
-def strongScalability(df, db_labels, master_types, algorithms, dir_path):
-    n_core = ["2", "4", "8", "16"]
+def strongScalability(df):
 
     for db in db_labels:
         alg_list = []
@@ -255,7 +258,7 @@ def strongScalability(df, db_labels, master_types, algorithms, dir_path):
             n_core, alg_list[1],
             n_core, alg_list[2], 
             n_core, alg_list[3],
-            "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+            "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "# core",
             "time (ms)",
             "Strong scalability - db"+db,
@@ -266,7 +269,7 @@ def strongScalability(df, db_labels, master_types, algorithms, dir_path):
             n_core, alg_list[1],
             n_core, alg_list[2], 
             n_core, alg_list[3],
-            "apriorispc", "apriorimapreduce", "fpgrowth",
+            "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "# core",
             "time (ms)",
             "Strong scalability - db"+db,
@@ -291,7 +294,7 @@ def strongScalability(df, db_labels, master_types, algorithms, dir_path):
             n_core, secondi[1],
             n_core, secondi[2], 
             n_core, secondi[3],
-            "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+            "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "# core",
             "time (s)",
             "Strong scalability - db"+db,
@@ -302,7 +305,7 @@ def strongScalability(df, db_labels, master_types, algorithms, dir_path):
             n_core, secondi[1],
             n_core, secondi[2], 
             n_core, secondi[3],
-            "apriorispc", "apriorimapreduce", "fpgrowth",
+            "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
             "# core",
             "time (s)",
             "Strong scalability - db"+db,
@@ -310,11 +313,9 @@ def strongScalability(df, db_labels, master_types, algorithms, dir_path):
         )
        
 
-def weakScalability(df, db_labels, master_types, algorithms, dir_path):
-    n_core = ["2", "4", "8", "16"]
-    db_size = ["100000", "200000", "300000", "400000"]
+def weakScalability(df):
+    
     nCore_dbSize = list(map(lambda i: str("("+str(n_core[i])+", "+db_size[i]+")"), range(0,4)))
-
     alg_list = []
 
     for alg in algorithms:
@@ -370,7 +371,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, alg_list[1],
         nCore_dbSize, alg_list[2], 
         nCore_dbSize, alg_list[3],
-        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (ms)",
         "Weak scalability",
@@ -381,7 +382,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, alg_list[1],
         nCore_dbSize, alg_list[2], 
         nCore_dbSize, alg_list[3],
-        "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (ms)",
         "Weak scalability",
@@ -393,7 +394,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, alg_list[1],
         nCore_dbSize, alg_list[2], 
         nCore_dbSize, alg_list[3],
-        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (ms)",
         "Weak scalability",
@@ -404,7 +405,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, alg_list[1],
         nCore_dbSize, alg_list[2], 
         nCore_dbSize, alg_list[3],
-        "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (ms)",
         "Weak scalability",
@@ -418,7 +419,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, secondi[1],
         nCore_dbSize, secondi[2], 
         nCore_dbSize, secondi[3],
-        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (ms)",
         "Weak scalability",
@@ -429,7 +430,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, secondi[1],
         nCore_dbSize, secondi[2], 
         nCore_dbSize, secondi[3],
-        "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (ms)",
         "Weak scalability",
@@ -441,7 +442,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, secondi[1],
         nCore_dbSize, secondi[2], 
         nCore_dbSize, secondi[3],
-        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (s)",
         "Weak scalability",
@@ -452,7 +453,7 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
         nCore_dbSize, secondi[1],
         nCore_dbSize, secondi[2], 
         nCore_dbSize, secondi[3],
-        "apriorispc", "apriorimapreduce", "fpgrowth",
+        "AprioriTailRec", "AprioriMapReduce", "FPGrowth",
         "(# core, db size)",
         "time (s)",
         "Weak scalability",
@@ -495,13 +496,8 @@ def computeResultFilePath():
 
 
 if __name__ == "__main__":
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    db_labels = ["1", "2", "3", "4"]
-    master_types = ["yarn_w2_c1", "yarn_w2_c2", "yarn_w4_c2", "yarn_w4_c4"]
-    algorithms = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
-
     csv_file = computeResultFilePath()
     df = pd.read_csv(csv_file)
-    compareAlgorithms(df, db_labels, master_types, algorithms, dir_path)
-    strongScalability(df, db_labels, master_types, algorithms, dir_path)
-    weakScalability(df, db_labels, master_types, algorithms, dir_path)
+    compareAlgorithms(df)
+    strongScalability(df)
+    weakScalability(df)
