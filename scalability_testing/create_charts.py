@@ -1,7 +1,93 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
 import os
+
+
+def createBarChart1(x1, y1, label1, xlabel, ylabel, title, filename):
+    db_size = ["100000", "200000", "300000", "400000"]
+    colors = {'100000':'red', '200000':'green', '300000':'blue', '400000':'#FFD700'}         
+    labels = list(colors.keys())
+    handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in labels]
+    plt.legend(handles, labels,  title="Db size")
+
+    for i in range(0,4):
+        plt.bar(x1[i], y1[i], color=colors[db_size[i]], label=label1, width = 0.5)
+
+    plt.subplots_adjust(left=0.15, bottom=0.15)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.savefig(filename+".png")
+    plt.clf()
+
+
+def createBarChart3(
+        x1, y1, 
+        x2, y2, 
+        x3, y3, 
+        label1, label2, label3,  
+        xlabel,
+        ylabel,
+        title, filename):
+     
+    algorithms = {'apriorispc':'green', 'apriorimapreduce':'blue', 'fpgrowth':'#FFD700'}         
+    labels = ["apriorispc", "apriorimapreduce", "fpgrowth"]
+    handles = [plt.Rectangle((0,0),1,1, color=algorithms[label]) for label in labels]
+    plt.legend(handles, labels,  title="Algorithms")
+
+    barWidth = 0.2
+    br1 = np.arange(len(y1))
+    br2 = [x + barWidth for x in br1]
+    br3 = [x + barWidth for x in br2]
+    
+    plt.bar(br1, y1, color ='green', width=barWidth, edgecolor='grey', label=label1)
+    plt.bar(br2, y2, color ='blue', width=barWidth, edgecolor='grey', label=label2)
+    plt.bar(br3, y3, color ='#FFD700', width=barWidth, edgecolor='grey', label=label3)
+    
+    plt.xticks([r + barWidth for r in range(len(y1))], x1)
+    plt.subplots_adjust(left=0.15, bottom=0.15)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.savefig(filename+".png")
+    plt.clf()
+
+
+def createBarChart4(
+        x1, y1, 
+        x2, y2, 
+        x3, y3, 
+        x4, y4, 
+        label1, label2, label3, label4, 
+        xlabel,
+        ylabel,
+        title, filename):
+     
+    algorithms = {'aprioriseq':'red', 'apriorispc':'green', 'apriorimapreduce':'blue', 'fpgrowth':'#FFD700'}         
+    labels = ["aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth"]
+    handles = [plt.Rectangle((0,0),1,1, color=algorithms[label]) for label in labels]
+    plt.legend(handles, labels,  title="Algorithms")
+
+    barWidth = 0.2
+    br1 = np.arange(len(y1))
+    br2 = [x + barWidth for x in br1]
+    br3 = [x + barWidth for x in br2]
+    br4 = [x + barWidth for x in br3]
+    
+    plt.bar(br1, y1, color ='red', width=barWidth, edgecolor='grey', label=label1)
+    plt.bar(br2, y2, color ='green', width=barWidth, edgecolor='grey', label=label2)
+    plt.bar(br3, y3, color ='blue', width=barWidth, edgecolor='grey', label=label3)
+    plt.bar(br4, y4, color ='#FFD700', width=barWidth, edgecolor='grey', label=label4)
+    
+    plt.xticks([r + barWidth for r in range(len(y1))], x1)
+    plt.subplots_adjust(left=0.15, bottom=0.15)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.savefig(filename+".png")
+    plt.clf()
+
 
 def createLineChart1(x1, y1, label1, xlabel, ylabel, title, filename):
     plt.plot(x1, y1, label = label1, linestyle="-", marker = 'o')
@@ -12,7 +98,6 @@ def createLineChart1(x1, y1, label1, xlabel, ylabel, title, filename):
     plt.subplots_adjust(left=0.15, bottom=0.15)
     plt.savefig(filename+".png")
     plt.clf()
-
 
 
 def createLineChart3(
@@ -31,9 +116,9 @@ def createLineChart3(
     plt.legend()
     plt.title(title)
     plt.subplots_adjust(left=0.15, bottom=0.15)
-    #plt.xticks(rotation = 45) 
     plt.savefig(filename+".png")
     plt.clf()
+
 
 def createLineChart4(
         x1, y1, 
@@ -53,15 +138,13 @@ def createLineChart4(
     plt.legend()
     plt.title(title)
     plt.subplots_adjust(left=0.15, bottom=0.15)
-    #plt.xticks(rotation = 45) 
     plt.savefig(filename+".png")
     plt.clf()
 
 
-
 def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
     
-    
+    sizeDb = list(map(lambda num: str(int(num) * 100000), db_labels))
 
     for master in master_types:
         alg_list = []
@@ -74,10 +157,10 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
 
         
         createLineChart4(
-            db_labels, alg_list[0], 
-            db_labels, alg_list[1],
-            db_labels, alg_list[2], 
-            db_labels, alg_list[3],
+            sizeDb, alg_list[0], 
+            sizeDb, alg_list[1],
+            sizeDb, alg_list[2], 
+            sizeDb, alg_list[3],
             "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
             "dataset",
             "time (ms)",
@@ -86,9 +169,9 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
         )
 
         createLineChart3(
-            db_labels, alg_list[1],
-            db_labels, alg_list[2], 
-            db_labels, alg_list[3],
+            sizeDb, alg_list[1],
+            sizeDb, alg_list[2], 
+            sizeDb, alg_list[3],
             "apriorispc", "apriorimapreduce", "fpgrowth",
             "dataset",
             "time (ms)",
@@ -98,7 +181,7 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
 
         for i in range(4):
             createLineChart1(
-                db_labels, alg_list[i], 
+                sizeDb, alg_list[i], 
                 algorithms[i],
                 "dataset",
                 "time (ms)",
@@ -111,10 +194,10 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
         secondi = convertListToSecond(alg_list)
 
         createLineChart4(
-            db_labels, secondi[0], 
-            db_labels, secondi[1],
-            db_labels, secondi[2], 
-            db_labels, secondi[3],
+            sizeDb, secondi[0], 
+            sizeDb, secondi[1],
+            sizeDb, secondi[2], 
+            sizeDb, secondi[3],
             "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
             "dataset",
             "time (s)",
@@ -123,9 +206,9 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
         )
 
         createLineChart3(
-            db_labels, secondi[1],
-            db_labels, secondi[2], 
-            db_labels, secondi[3],
+            sizeDb, secondi[1],
+            sizeDb, secondi[2], 
+            sizeDb, secondi[3],
             "apriorispc", "apriorimapreduce", "fpgrowth",
             "dataset",
             "time (s)",
@@ -135,16 +218,14 @@ def compareAlgorithms(df, db_labels, master_types, algorithms, dir_path):
 
         for i in range(4):
             createLineChart1(
-                db_labels, secondi[i], 
+                sizeDb, secondi[i], 
                 algorithms[i],
                 "dataset",
                 "time (s)",
                 algorithms[i] + " - " +fromMasterToCore(master)+" cores",
                 dir_path+"/grafici_algoritmi/sec_"+fromMasterToCore(master)+"_cores_"+algorithms[i]
             )
-        
-        
-        
+       
 
 def strongScalability(df, db_labels, master_types, algorithms, dir_path):
     n_core = ["2", "4", "8", "16"]
@@ -227,15 +308,13 @@ def strongScalability(df, db_labels, master_types, algorithms, dir_path):
             "Strong scalability - db"+db,
             dir_path+"/grafici_strong_scalability/sec_strong_scalability_db"+db+"_noSeq"
         )
-
-
-        
-        
-        
-        
+       
 
 def weakScalability(df, db_labels, master_types, algorithms, dir_path):
     n_core = ["2", "4", "8", "16"]
+    db_size = ["100000", "200000", "300000", "400000"]
+    nCore_dbSize = list(map(lambda i: str("("+str(n_core[i])+", "+db_size[i]+")"), range(0,4)))
+
     alg_list = []
 
     for alg in algorithms:
@@ -248,52 +327,85 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
 
         alg_list.append(times)
 
-
-        """ ar = np.array(times)
-        ar_persist = np.array(times_persist)
-        print(alg,"senza", ar)
-        print(alg, "con", ar_persist)  """
-    
-        
-        createLineChart1( 
+        createBarChart1( 
             n_core, times,
             alg, 
             "# core",
             "time (ms)",
             "Weak scalability - "+alg,
-            dir_path+"/grafici_weak_scalability/weak_scalability_"+alg
+            dir_path+"/grafici_weak_scalability/bar_weak_scalability_"+alg
         )   
 
+        createLineChart1( 
+            nCore_dbSize, times,
+            alg, 
+            "(# core, db size)",
+            "time (ms)",
+            "Weak scalability - "+alg,
+            dir_path+"/grafici_weak_scalability/weak_scalability_"+alg
+        )   
+     
         # in secondi
         secondi = convertToSecond(times)
-        createLineChart1( 
+        createBarChart1( 
             n_core, secondi,
             alg, 
             "# core",
+            "time (ms)",
+            "Weak scalability - "+alg,
+            dir_path+"/grafici_weak_scalability/sec_bar_weak_scalability_"+alg
+        )   
+
+        createLineChart1( 
+            nCore_dbSize, secondi,
+            alg, 
+            "(# core, db size)",
             "time (s)",
             "Weak scalability - "+alg,
             dir_path+"/grafici_weak_scalability/sec_weak_scalability_"+alg
         )   
 
-    
-    createLineChart4(
-        n_core, alg_list[0], 
-        n_core, alg_list[1],
-        n_core, alg_list[2], 
-        n_core, alg_list[3],
+    createBarChart4(
+        nCore_dbSize, alg_list[0], 
+        nCore_dbSize, alg_list[1],
+        nCore_dbSize, alg_list[2], 
+        nCore_dbSize, alg_list[3],
         "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-        "# core",
+        "(# core, db size)",
+        "time (ms)",
+        "Weak scalability",
+        dir_path+"/grafici_weak_scalability/bar_weak_scalability"
+    )
+
+    createBarChart3(
+        nCore_dbSize, alg_list[1],
+        nCore_dbSize, alg_list[2], 
+        nCore_dbSize, alg_list[3],
+        "apriorispc", "apriorimapreduce", "fpgrowth",
+        "(# core, db size)",
+        "time (ms)",
+        "Weak scalability",
+        dir_path+"/grafici_weak_scalability/bar_weak_scalability_noSeq"
+    )
+  
+    createLineChart4(
+        nCore_dbSize, alg_list[0], 
+        nCore_dbSize, alg_list[1],
+        nCore_dbSize, alg_list[2], 
+        nCore_dbSize, alg_list[3],
+        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "(# core, db size)",
         "time (ms)",
         "Weak scalability",
         dir_path+"/grafici_weak_scalability/weak_scalability"
     )
 
     createLineChart3(
-        n_core, alg_list[1],
-        n_core, alg_list[2], 
-        n_core, alg_list[3],
+        nCore_dbSize, alg_list[1],
+        nCore_dbSize, alg_list[2], 
+        nCore_dbSize, alg_list[3],
         "apriorispc", "apriorimapreduce", "fpgrowth",
-        "# core",
+        "(# core, db size)",
         "time (ms)",
         "Weak scalability",
         dir_path+"/grafici_weak_scalability/weak_scalability_noSeq"
@@ -301,28 +413,52 @@ def weakScalability(df, db_labels, master_types, algorithms, dir_path):
 
     # in secondi
     secondi = convertListToSecond(alg_list)
-    createLineChart4(
-        n_core, secondi[0], 
-        n_core, secondi[1],
-        n_core, secondi[2], 
-        n_core, secondi[3],
+    createBarChart4(
+        nCore_dbSize, secondi[0], 
+        nCore_dbSize, secondi[1],
+        nCore_dbSize, secondi[2], 
+        nCore_dbSize, secondi[3],
         "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
-        "# core",
+        "(# core, db size)",
+        "time (ms)",
+        "Weak scalability",
+        dir_path+"/grafici_weak_scalability/sec_bar_weak_scalability"
+    )
+
+    createBarChart3(
+        nCore_dbSize, secondi[1],
+        nCore_dbSize, secondi[2], 
+        nCore_dbSize, secondi[3],
+        "apriorispc", "apriorimapreduce", "fpgrowth",
+        "(# core, db size)",
+        "time (ms)",
+        "Weak scalability",
+        dir_path+"/grafici_weak_scalability/sec_bar_weak_scalability_noSeq"
+    )
+
+    createLineChart4(
+        nCore_dbSize, secondi[0], 
+        nCore_dbSize, secondi[1],
+        nCore_dbSize, secondi[2], 
+        nCore_dbSize, secondi[3],
+        "aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth",
+        "(# core, db size)",
         "time (s)",
         "Weak scalability",
         dir_path+"/grafici_weak_scalability/sec_weak_scalability"
     )
 
     createLineChart3(
-        n_core, secondi[1],
-        n_core, secondi[2], 
-        n_core, secondi[3],
+        nCore_dbSize, secondi[1],
+        nCore_dbSize, secondi[2], 
+        nCore_dbSize, secondi[3],
         "apriorispc", "apriorimapreduce", "fpgrowth",
-        "# core",
+        "(# core, db size)",
         "time (s)",
         "Weak scalability",
         dir_path+"/grafici_weak_scalability/sec_weak_scalability_noSeq"
     )
+
     
 def convertListToSecond(x):
     outputList = []
@@ -330,11 +466,13 @@ def convertListToSecond(x):
         outputList.append(convertToSecond(elem))
     return outputList
 
+
 def convertToSecond(x):
     outputList = []
     for elem in x:
         outputList.append(elem / 1000)
     return outputList
+
 
 def fromMasterToCore(master):
     if("w2_c1" in master):
