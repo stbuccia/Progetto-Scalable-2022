@@ -1,6 +1,6 @@
 
 import associationrulelearning.VerifyAssociationRules.verify
-import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriSparkSPC, FPGrowth, VerifyAssociationRules}
+import associationrulelearning.{AprioriMapReduce, AprioriSeq, AprioriTailRec, FPGrowth, VerifyAssociationRules}
 import clustering.EarthquakeKMeans.kMeansClustering
 import dataconversion.mainDataConversion.labelConversion
 import org.apache.spark.{HashPartitioner, Partitioner, SparkContext}
@@ -80,7 +80,7 @@ object Main {
 
     val normalizedData: RDD[(Int, Set[String])] = clusteredData.map(entry => (entry._1, labelConversion(entry._2)))//.persist()
 
-    val algorithms = if (simulation) List("aprioriseq", "apriorispc", "apriorimapreduce", "fpgrowth") else List(classifier)
+    val algorithms = if (simulation) List("aprioriseq", "aprioritailrec", "apriorimapreduce", "fpgrowth") else List(classifier)
 
     val times = executeAlgorithms(algorithms, sparkSession, sc, numClusters, normalizedData, outputFolder)
     writeTimesToCSV(sparkSession, times, master, datasetPath, outputFolder + "/times")
@@ -123,9 +123,9 @@ object Main {
           val seqInstance = new AprioriSeq(collectedTransaction)
           associationRules = associationRules :+ sc.parallelize(seqInstance.run())
           //val assRulesSubset = seqInstance.run()
-        case "apriorispc" =>
-          val spcInstance = new AprioriSparkSPC(transactions)
-          associationRules = associationRules :+ spcInstance.run()
+        case "aprioritailrec" =>
+          val tailrecInstance = new AprioriTailRec(transactions)
+          associationRules = associationRules :+ tailrecInstance.run()
         case "apriorimapreduce" =>
           val mapreduceInstance = new AprioriMapReduce(transactions)
           associationRules = associationRules :+ mapreduceInstance.run()

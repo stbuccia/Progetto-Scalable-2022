@@ -4,7 +4,7 @@ import org.apache.spark.rdd.RDD
 import scala.annotation.tailrec
 
 
-class AprioriSparkSPC(dataset: RDD[Set[String]]) extends java.io.Serializable with Apriori[RDD[Set[String]]] {
+class AprioriTailRec(dataset: RDD[Set[String]]) extends java.io.Serializable with Apriori[RDD[Set[String]]] {
 
   var transactions: RDD[Set[String]] = dataset
   var minSupportCount: Int = (minSupport * transactions.count()).toInt

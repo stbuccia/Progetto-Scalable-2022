@@ -10,7 +10,7 @@ This is the list of arguments necessary for the run
 + `--master` <yarn|local[*]|local[2]|...>
 + `--dataset` <dataset path>
 + `--sim`  <true|false>
-+ `--classifier` <apriorispc|aprioriseq|apriorimapreduce|fpgrowth>
++ `--classifier` <aprioritailrec|aprioriseq|apriorimapreduce|fpgrowth>
 + `--compute-elbow-mode` <true|false>
 + `--output-folder` <output folder path>
 
