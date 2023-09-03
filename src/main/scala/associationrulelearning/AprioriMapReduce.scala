@@ -46,7 +46,6 @@ class AprioriMapReduce(dataset: RDD[Set[String]]) extends Serializable with Apri
                               min_support: Double,
                               i: Int) = {
 
-    //TODO collect() dopo countItemsetsSizeN?
     val array_itemsetsSizeN = rdd_itemsets
       .map(_._1)
       .flatMap(x => generateItemsetsSizeN(x, labelSet))
