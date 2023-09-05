@@ -5,14 +5,14 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 db_labels = ["1", "2", "3", "4"]
-db_size = ["100000", "200000", "300000", "400000"]
+db_size = ["100000", "200000", "400000", "800000"]
 algorithms = ["AprioriSeq", "AprioriTailRec", "AprioriMapReduce", "FPGrowth"]
 master_types = ["yarn_w2_c1", "yarn_w2_c2", "yarn_w4_c2", "yarn_w4_c4"]
 n_core = ["2", "4", "8", "16"]
 
 
 def createBarChart1(x1, y1, label1, xlabel, ylabel, title, filename):
-    colors = {'100000':'red', '200000':'green', '300000':'blue', '400000':'#FFD700'}         
+    colors = {'100000':'red', '200000':'green', '400000':'blue', '800000':'#FFD700'}         
     labels = list(colors.keys())
     handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in labels]
     plt.legend(handles, labels,  title="Db size")
