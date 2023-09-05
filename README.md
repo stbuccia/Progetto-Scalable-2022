@@ -3,6 +3,25 @@
 Project for "Scalable and Cloud Programming" course of the University of Bologna.
 The project aims at generating association rules for Earthquakes Dataset, following the cited paper approach. Various version of the Apriori algorithm have been used, exploiting the MapReduce paradigm.
 
+##
+
+The app runs two main phases, which are: **data pre-processing** and **association rule mining**.
+
+### Data pre-processing
+
+During this first part, data are (1) divided into clusters based on their magnitude, then (2) converted so that they assume [0,1] values. 
+
+Clustering allows to search for frequent items inside each cluster, thus having more precise results. This is done by using [KMeans algorithm from Spark's MLib library](https://spark.apache.org/docs/latest/ml-clustering.html).
+
+Once clustered, data are normalized (i.e. converted in [0,1] values). This is done by changing the attributes into cathegorical ones, so that instead of numerical values data will express an attribute with a 0 value if they do  not belong tho the cathegory, 1 instead.
+
+Attributes are updated as follows:
+
+
+
+### Association Rule Mining
+
+
 ## Usage
 
 This is the list of arguments necessary for the run
