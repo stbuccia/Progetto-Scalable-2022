@@ -302,4 +302,10 @@ fi
 
     # download risultati
     gsutil -m cp -r $BUCKET/output/* ./output/
-    #gsutil -m cp -r gs://bucket-apriori/output/* ./output/
+
+
+# CREAZIONE GRAFICI ---------------------------------------------------------------------------------
+python3 create_result_db.py
+cd ..
+cd scalability_testing
+python3 create_charts.py

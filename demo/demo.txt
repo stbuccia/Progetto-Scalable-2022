@@ -1,0 +1,49 @@
+# creazione bucket
+gsutil mb -l us-east1 gs://b-apriori
+
+
+# copia del file .jar nel bucket
+gsutil -m cp \
+	demo_upload/armep.jar \
+	gs://b-apriori/armep.jar
+
+
+# copia dataset nel bucket
+gsutil -m cp \
+	demo_upload/dataset_1.csv \
+	gs://b-apriori/input/dataset_1.csv
+
+ 
+# creazione cluster 
+gcloud dataproc clusters create cluster-apriori \
+    --enable-component-gateway \
+    --region us-east1 \
+    --master-machine-type n1-standard-4 \
+    --master-boot-disk-size 100 \
+    --num-workers 4 \
+    --worker-machine-type n1-standard-4 \
+    --worker-boot-disk-size 100 \
+    --image-version 2.0-debian10 \
+    --project natural-axiom-390913 
+
+
+# submit job 
+gcloud dataproc jobs submit spark \
+    --cluster=cluster-apriori \
+    --class=Main \
+    --jars=gs://b-apriori/armep.jar \
+    --region=us-east1 \
+    -- --master yarn --dataset gs://b-apriori/input/dataset_1.csv --sim true --output-folder gs://b-apriori/output/sim_yarn_w4_c4_1/
+
+
+# eliminazione cluster
+gcloud dataproc clusters delete cluster-apriori --region=us-east1 --quiet
+ 
+
+# download risultati
+gsutil -m cp -r gs://b-apriori/output/* ./demo_output/
+
+
+# eliminazione bucket
+gsutil rm -r gs://b-apriori
+gsutil -m rm -r gs://dataproc*

@@ -52,10 +52,6 @@ def mergeResult():
 
     df = pd.concat(listCSV, ignore_index=True)
 
-    #print("Numero di file letti = ", len(listCSV))
-    #print("Numero totale righe = ", df.shape[0])
-    #print( sumRows == df.shape[0] )
-
     # scrivi file di output
     df.to_csv(dir_path + "/" + fileNameOutput, index=False) 
     print("Nuovo file creato: ", dir_path + "/" + fileNameOutput)
