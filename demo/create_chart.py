@@ -65,13 +65,9 @@ def createBarChart(df):
     df = df.sort_values(by=['time elapsed (ms)'], ascending=False)
     x = df['algorithm']
     y = convertToSecond(df['time elapsed (ms)'])
- 
     barWidth = 0.2
-    br1 = np.arange(len(y))
 
-    plt.bar(br1, y, color ='blue', width=barWidth, edgecolor='grey')
-
-    plt.xticks([r + barWidth for r in range(len(y))], x)
+    plt.bar(x, y, color ='blue', width=barWidth, edgecolor='grey')
     plt.subplots_adjust(left=0.15, bottom=0.15)
     plt.xlabel("Algorithms")
     plt.ylabel("Time (s)")
