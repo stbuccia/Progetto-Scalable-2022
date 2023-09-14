@@ -76,9 +76,8 @@ class AprioriTailRec(dataset: RDD[Set[String]]) extends java.io.Serializable wit
     val transactionsRdd = (transactions)
 
     val setL_1 = phase1(transactionsRdd) 
-    val setL_2 = setL_1.union(phase2(transactionsRdd, 2, setL_1))
 
-    val frequentItemsets: RDD[(Set[String], Int)] = recursivePhase2(transactionsRdd, 3, setL_2)
+    val frequentItemsets: RDD[(Set[String], Int)] = recursivePhase2(transactionsRdd, 2, setL_1)
     val associationRules: RDD[(Set[String], Set[String], Double)] = generateAssociationRules(frequentItemsets, minConfidence)
 
     associationRules
