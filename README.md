@@ -46,6 +46,21 @@ This is the list of arguments necessary for the run
 
 When running on local mode libraries import from 'build.sbt' file must be changed: the version without 'provided' is the suitable one.
 
+Example to run code in local:
+
+```
+git clone https://github.com/stbuccia/Progetto-Scalable-2022.git
+cd Progetto-Scalable-2022
+mkdir output
+sbt
+```
+
+Once in sbt shell, run the command:
+
+```
+run --master local[*] --dataset dataset/dataset_1.csv --sim true --output-folder output 
+```
+
 ## How to run (cloud mode)
 
 This project has been (mainly) deployed on **Google Cloud Platform (GCP)**. Here are the steps to follow in order to execute it in this mode.
