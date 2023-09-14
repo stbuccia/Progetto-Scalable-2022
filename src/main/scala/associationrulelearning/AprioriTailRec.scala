@@ -72,17 +72,6 @@ class AprioriTailRec(dataset: RDD[Set[String]]) extends java.io.Serializable wit
 
   }
 
-  def candidateExistsInTransaction(candidate: Set[String], transaction: Set[String]): Boolean = {
-    // all elements in candidate exist in transaction
-    var result = true
-    for (elem <- candidate) {
-      if (!transaction.contains(elem))
-        result = false
-    }
-    result
-  }
-
-
   override def run(): RDD[(Set[String], Set[String], Double)] = {
     val transactionsRdd = (transactions)
 
